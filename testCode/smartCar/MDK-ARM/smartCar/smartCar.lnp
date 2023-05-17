@@ -6,6 +6,7 @@
 "smartcar\usart.o"
 "smartcar\stm32f1xx_it.o"
 "smartcar\stm32f1xx_hal_msp.o"
+"smartcar\motor.o"
 "smartcar\stm32f1xx_hal_gpio_ex.o"
 "smartcar\stm32f1xx_hal_tim.o"
 "smartcar\stm32f1xx_hal_tim_ex.o"
