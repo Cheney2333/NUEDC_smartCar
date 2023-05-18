@@ -27,11 +27,18 @@ Project File Date:  05/18/2023
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Program Files\Keil_v5\ARM\ARMCC\Bin'
 Build target 'smartCar'
-compiling motor.c...
+compiling main.c...
+../Core/Src/main.c(123): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(OledString, "batteryVoltage:", adcGetBatteryVoltage());
+../Core/Src/main.c(123): warning:  #225-D: the format string ends before this argument
+      sprintf(OledString, "batteryVoltage:", adcGetBatteryVoltage());
+../Core/Src/main.c(125): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+  		sprintf(OledString, "%.2fV", adcGetBatteryVoltage());
+../Core/Src/main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=9072 RO-data=380 RW-data=916 ZI-data=1460  
+Program Size: Code=14888 RO-data=2468 RW-data=20 ZI-data=1508  
 FromELF: creating hex file...
-"smartCar\smartCar.axf" - 0 Error(s), 0 Warning(s).
+"smartCar\smartCar.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

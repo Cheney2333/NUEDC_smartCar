@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -25,6 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "motor.h"
+#include "oled.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +50,8 @@
 /* USER CODE BEGIN PV */
 int testPWM = 20;
 uint8_t g_ucUsart2ReceiveData; // 保存串口2接收的数据
+uint8_t OledString[3] = "U: ";
+int oledFlag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +99,7 @@ int main(void)
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_Clear();
@@ -107,38 +113,52 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    OLED_ShowCHinese(0, 0, 0);   // 中
-    OLED_ShowCHinese(18, 0, 1);  // 景
-    OLED_ShowCHinese(36, 0, 2);  // 园
-    OLED_ShowCHinese(54, 0, 3);  // 电
-    OLED_ShowCHinese(72, 0, 4);  // 子
-    OLED_ShowCHinese(90, 0, 5);  // 科
-    OLED_ShowCHinese(108, 0, 6); // 技
+    // if (oledFlag == 0)
+    // {
+    //   OLED_Init();
+    //   HAL_Delay(20);
+    //   oledFlag = 1;
+    // }
+		HAL_Delay(10);
+    sprintf(OledString, "batteryVoltage:", adcGetBatteryVoltage());
+    OLED_ShowString(0, 0, (uint8_t *)OledString, 14);
+		sprintf(OledString, "%.2fV", adcGetBatteryVoltage());
+    OLED_ShowString(0, 2, (uint8_t *)OledString, 14);
+		
+    // OLED_ShowCHinese(0, 0, 0);   // 中
+    // OLED_ShowCHinese(18, 0, 1);  // 景
+    // OLED_ShowCHinese(36, 0, 2);  // 园
+    // OLED_ShowCHinese(54, 0, 3);  // 电
+    // OLED_ShowCHinese(72, 0, 4);  // 子
+    // OLED_ShowCHinese(90, 0, 5);  // 科
+    // OLED_ShowCHinese(108, 0, 6); // 技
 
-    // MotorControl(0, testPWM, testPWM); // 鐩磋??
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
-    // MotorControl(1, testPWM, testPWM); // 鍚庨??
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
-    // MotorControl(3, testPWM, testPWM); // 宸﹁浆
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
-    // MotorControl(0, testPWM, testPWM); // 鐩磋??
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
-    // MotorControl(4, testPWM, testPWM); // 鍙宠浆
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
-    // MotorControl(1, testPWM, testPWM); // 鍚庨??
-    // HAL_Delay(1000);
-    // MotorControl(2, 0, 0); // 鍋滄??
-    // HAL_Delay(500);
+    //  printf("U: %.2f V\r\n", adcGetBatteryVoltage());
+    //  这个是oled驱动里面的，是显示位置的一个函数，
+    //   MotorControl(0, testPWM, testPWM); // 鐩磋??
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
+    //   MotorControl(1, testPWM, testPWM); // 鍚庨??
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
+    //   MotorControl(3, testPWM, testPWM); // 宸﹁浆
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
+    //   MotorControl(0, testPWM, testPWM); // 鐩磋??
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
+    //   MotorControl(4, testPWM, testPWM); // 鍙宠浆
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
+    //   MotorControl(1, testPWM, testPWM); // 鍚庨??
+    //   HAL_Delay(1000);
+    //   MotorControl(2, 0, 0); // 鍋滄??
+    //   HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -154,6 +174,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
    * in the RCC_OscInitTypeDef structure.
@@ -182,6 +203,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
@@ -189,10 +216,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1) // htim1 100HZ 10ms 中断一次
   {
-    
   }
 }
-
 
 /* USER CODE END 4 */
 
