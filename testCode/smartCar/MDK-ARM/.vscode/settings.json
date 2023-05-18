@@ -3,6 +3,7 @@
         "*.cjson": "jsonc",
         "*.wxss": "css",
         "*.wxs": "javascript",
-        "tim.h": "c"
+        "tim.h": "c",
+        "oled.h": "c"
     }
 }

@@ -1130,8 +1130,8 @@ HAL_StatusTypeDef HAL_UART_UnRegisterRxEventCallback(UART_HandleTypeDef *huart)
   *         of u16 provided through pData.
   * @param  huart Pointer to a UART_HandleTypeDef structure that contains
   *               the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be sent
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be sent
   * @param  Timeout Timeout duration
   * @retval HAL status
   */
@@ -1212,8 +1212,8 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef *huart, const uint8_t *pD
   *         of u16 available through pData.
   * @param  huart Pointer to a UART_HandleTypeDef structure that contains
   *               the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be received.
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be received.
   * @param  Timeout Timeout duration
   * @retval HAL status
   */
@@ -1298,8 +1298,8 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, ui
   *         of u16 provided through pData.
   * @param  huart Pointer to a UART_HandleTypeDef structure that contains
   *               the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be sent
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be sent
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size)
@@ -1337,8 +1337,8 @@ HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, const uint8_t 
   *         of u16 available through pData.
   * @param  huart Pointer to a UART_HandleTypeDef structure that contains
   *               the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be received.
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be received.
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
@@ -1369,8 +1369,8 @@ HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData,
   *         of u16 provided through pData.
   * @param  huart  Pointer to a UART_HandleTypeDef structure that contains
   *                the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be sent
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be sent
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size)
@@ -1430,8 +1430,8 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t
   *         of u16 available through pData.
   * @param  huart Pointer to a UART_HandleTypeDef structure that contains
   *               the configuration information for the specified UART module.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be received.
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be received.
   * @note   When the UART parity is enabled (PCE = 1) the received data contains the parity bit.
   * @retval HAL status
   */
@@ -3214,8 +3214,8 @@ static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef *huart, 
   *         i.e. Rx State, buffer address, ...
   *         UART Handle is assumed as Locked.
   * @param  huart UART handle.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be received.
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be received.
   * @retval HAL status
   */
 HAL_StatusTypeDef UART_Start_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
@@ -3249,8 +3249,8 @@ HAL_StatusTypeDef UART_Start_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pDat
   *         i.e. Rx State, buffer address, ...
   *         UART Handle is assumed as Locked.
   * @param  huart UART handle.
-  * @param  pData Pointer to data buffer (u8 or u16 data elements).
-  * @param  Size  Amount of data elements (u8 or u16) to be received.
+  * @param  pData Pointer to data buffer (uint8_t or u16 data elements).
+  * @param  Size  Amount of data elements (uint8_t or u16) to be received.
   * @retval HAL status
   */
 HAL_StatusTypeDef UART_Start_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)

@@ -22,16 +22,23 @@ Dialog DLL:      TCM.DLL V1.48.0.0
  
 <h2>Project:</h2>
 D:\OneDrive\Univesity\NUEDC\smartCar\testCode\smartCar\MDK-ARM\smartCar.uvprojx
-Project File Date:  05/17/2023
+Project File Date:  05/18/2023
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Program Files\Keil_v5\ARM\ARMCC\Bin'
 Build target 'smartCar'
 compiling main.c...
+../Core/Src/main.c(96): warning:  #223-D: function "OLED_Init" declared implicitly
+    OLED_Init(); // ≥ı ºªØOLED
+../Core/Src/main.c(97): warning:  #223-D: function "OLED_Clear" declared implicitly
+    OLED_Clear();
+../Core/Src/main.c(106): warning:  #223-D: function "OLED_ShowCHinese" declared implicitly
+      OLED_ShowCHinese(0, 0, 0);         // ÷–
+../Core/Src/main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=6840 RO-data=380 RW-data=20 ZI-data=1996  
+Program Size: Code=7248 RO-data=380 RW-data=912 ZI-data=1992  
 FromELF: creating hex file...
-"smartCar\smartCar.axf" - 0 Error(s), 0 Warning(s).
+"smartCar\smartCar.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +61,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

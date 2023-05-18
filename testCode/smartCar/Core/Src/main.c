@@ -93,6 +93,8 @@ int main(void)
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  OLED_Init(); // ��ʼ��OLED
+  OLED_Clear();
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
   /* USER CODE END 2 */
@@ -101,30 +103,38 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    MotorControl(0, testPWM, testPWM); // 直行
-    HAL_Delay(1000);
-    MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
-    MotorControl(1, testPWM, testPWM); // 后退
-    HAL_Delay(1000);
-    MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
-    MotorControl(3, testPWM, testPWM); // 左转
-    HAL_Delay(1000);
-		MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
-		MotorControl(0, testPWM, testPWM); // 直行
-    HAL_Delay(1000);
-		MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
-    MotorControl(4, testPWM, testPWM); // 右转
-    HAL_Delay(1000);
-		MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
-		MotorControl(1, testPWM, testPWM); // 后退
-    HAL_Delay(1000);
-		MotorControl(2, 0, 0); // 停止
-    HAL_Delay(500);
+    OLED_ShowCHinese(0, 0, 0);         // ��
+    OLED_ShowCHinese(18, 0, 1);        // ��
+    OLED_ShowCHinese(36, 0, 2);        // ԰
+    OLED_ShowCHinese(54, 0, 3);        // ��
+    OLED_ShowCHinese(72, 0, 4);        // ��
+    OLED_ShowCHinese(90, 0, 5);        // ��
+    OLED_ShowCHinese(108, 0, 6);       // ��
+
+    // MotorControl(0, testPWM, testPWM); // 直�??
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
+    // MotorControl(1, testPWM, testPWM); // 后�??
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
+    // MotorControl(3, testPWM, testPWM); // 左转
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
+    // MotorControl(0, testPWM, testPWM); // 直�??
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
+    // MotorControl(4, testPWM, testPWM); // 右转
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
+    // MotorControl(1, testPWM, testPWM); // 后�??
+    // HAL_Delay(1000);
+    // MotorControl(2, 0, 0); // 停�??
+    // HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

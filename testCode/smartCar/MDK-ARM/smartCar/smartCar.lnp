@@ -1,12 +1,12 @@
 --cpu Cortex-M3
 "smartcar\startup_stm32f103xe.o"
+"smartcar\motor.o"
 "smartcar\main.o"
 "smartcar\gpio.o"
 "smartcar\tim.o"
 "smartcar\usart.o"
 "smartcar\stm32f1xx_it.o"
 "smartcar\stm32f1xx_hal_msp.o"
-"smartcar\motor.o"
 "smartcar\stm32f1xx_hal_gpio_ex.o"
 "smartcar\stm32f1xx_hal_tim.o"
 "smartcar\stm32f1xx_hal_tim_ex.o"
@@ -22,6 +22,7 @@
 "smartcar\stm32f1xx_hal_exti.o"
 "smartcar\stm32f1xx_hal_uart.o"
 "smartcar\system_stm32f1xx.o"
+"smartcar\oled.o"
 --strict --scatter "smartCar\smartCar.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
