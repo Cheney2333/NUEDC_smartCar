@@ -34,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-int testPWM = 50;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,7 +45,8 @@ int testPWM = 50;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+int testPWM = 20;
+uint8_t g_ucUsart2ReceiveData; // 保存串口2接收的数据
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,9 +93,12 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_Clear();
+  HAL_TIM_Base_Start_IT(&htim1);                           // 开启定时器1中断
+  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收数据
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
   /* USER CODE END 2 */
@@ -103,13 +107,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    OLED_ShowCHinese(0, 0, 0);         // 中
-    OLED_ShowCHinese(18, 0, 1);        // 景
-    OLED_ShowCHinese(36, 0, 2);        // 园
-    OLED_ShowCHinese(54, 0, 3);        // 电
-    OLED_ShowCHinese(72, 0, 4);        // 子
-    OLED_ShowCHinese(90, 0, 5);        // 科
-    OLED_ShowCHinese(108, 0, 6);       // 技
+    OLED_ShowCHinese(0, 0, 0);   // 中
+    OLED_ShowCHinese(18, 0, 1);  // 景
+    OLED_ShowCHinese(36, 0, 2);  // 园
+    OLED_ShowCHinese(54, 0, 3);  // 电
+    OLED_ShowCHinese(72, 0, 4);  // 子
+    OLED_ShowCHinese(90, 0, 5);  // 科
+    OLED_ShowCHinese(108, 0, 6); // 技
 
     // MotorControl(0, testPWM, testPWM); // 鐩磋??
     // HAL_Delay(1000);
@@ -181,6 +185,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim == &htim1) // htim1 100HZ 10ms 中断一次
+  {
+    
+  }
+}
+
 
 /* USER CODE END 4 */
 

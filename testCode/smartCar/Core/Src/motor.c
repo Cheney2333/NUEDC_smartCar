@@ -66,11 +66,13 @@ void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM)
     BMotor_Go();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
+    break;
   case 4: // right
-    AMotor_Go();
+		AMotor_Go();
     BMotor_Back();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
+    break;
   default:
     break;
   }
