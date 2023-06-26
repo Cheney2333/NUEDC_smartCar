@@ -10,8 +10,7 @@
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\Drivers\\CMSIS\\Include",
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\HARDWARE\\OLED",
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\HARDWARE\\BLUETOOTH",
-                "D:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include",
-                "D:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include\\rw",
+                "D:\\Keil_v5\\ARM\\ARMCC\\include",
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\MDK-ARM",
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\Core\\Src",
                 "d:\\OneDrive\\Univesity\\NUEDC\\smartCar\\testCode\\smartCar\\Drivers\\STM32F1xx_HAL_Driver\\Src"

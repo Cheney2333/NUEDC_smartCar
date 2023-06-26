@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,6 +29,7 @@
 #include "motor.h"
 #include "oled.h"
 #include "stdio.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,9 +51,10 @@
 
 /* USER CODE BEGIN PV */
 int testPWM = 20;
-uint8_t g_ucUsart2ReceiveData; // ±£´æ´®¿Ú2½ÓÊÕµÄÊı¾İ
-uint8_t OledString[3] = "U: ";
+uint8_t g_ucUsart2ReceiveData; // ï¿½ï¿½ï¿½æ´®ï¿½ï¿½2ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½
+char OledString[10];
 int oledFlag = 0;
+int tim1Count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,11 +103,27 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  OLED_Init(); // ³õÊ¼»¯OLED
+  OLED_Init(); // åˆå§‹åŒ–OLED
   OLED_Clear();
-  HAL_TIM_Base_Start_IT(&htim1);                           // ¿ªÆô¶¨Ê±Æ÷1ÖĞ¶Ï
-  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // ´®¿Ú2½ÓÊÕÊı¾İ
+  OLED_ShowString(0, 2, "hello world!", 12, 0); // æ­£ç›¸æ˜¾ç¤º6X8å­—ç¬¦ä¸²
+
+  // OLED_ShowCHinese(0, 4, 0, 1);  // åç›¸æ˜¾ç¤ºæ±‰å­—â€œç‹¬â€
+  // OLED_ShowCHinese(16, 4, 1, 1); // åç›¸æ˜¾ç¤ºæ±‰å­—â€œè§’â€
+  // OLED_ShowCHinese(32, 4, 2, 1); // åç›¸æ˜¾ç¤ºæ±‰å­—â€œå…½â€
+  // OLED_ShowCHinese(0, 6, 0, 0);  // æ­£ç›¸æ˜¾ç¤ºæ±‰å­—â€œç‹¬â€
+  // OLED_ShowCHinese(16, 6, 1, 0); // æ­£ç›¸æ˜¾ç¤ºæ±‰å­—â€œè§’â€
+  // OLED_ShowCHinese(32, 6, 2, 0); // æ­£ç›¸æ˜¾ç¤ºæ±‰å­—â€œå…½â€
+
+  // OLED_ShowNum(48, 4, 6, 1, 16, 0);     // æ­£ç›¸æ˜¾ç¤º1ä½8X16æ•°å­—â€œ6â€
+  // OLED_ShowNum(48, 7, 77, 2, 12, 1);    // åç›¸æ˜¾ç¤º2ä½6X8æ•°å­—â€œ77â€
+  // OLED_DrawBMP(90, 0, 122, 4, BMP1, 0); // æ­£ç›¸æ˜¾ç¤ºå›¾ç‰‡BMP1
+  // OLED_DrawBMP(90, 4, 122, 8, BMP1, 1); // åç›¸æ˜¾ç¤ºå›¾ç‰‡BMP1
+
+  // OLED_HorizontalShift(0x26);                              // å…¨å±æ°´å¹³å‘å³æ»šåŠ¨æ’­æ”¾
+  HAL_TIM_Base_Start_IT(&htim1);                           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½1ï¿½Ğ¶ï¿½
+  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
   /* USER CODE END 2 */
@@ -113,51 +132,40 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // if (oledFlag == 0)
-    // {
-    //   OLED_Init();
-    //   HAL_Delay(20);
-    //   oledFlag = 1;
-    // }
-		HAL_Delay(10);
-    sprintf(OledString, "batteryVoltage:", adcGetBatteryVoltage());
-    OLED_ShowString(0, 0, (uint8_t *)OledString, 14);
-		sprintf(OledString, "%.2fV", adcGetBatteryVoltage());
-    OLED_ShowString(0, 2, (uint8_t *)OledString, 14);
-		
-    // OLED_ShowCHinese(0, 0, 0);   // ÖĞ
-    // OLED_ShowCHinese(18, 0, 1);  // ¾°
-    // OLED_ShowCHinese(36, 0, 2);  // Ô°
-    // OLED_ShowCHinese(54, 0, 3);  // µç
-    // OLED_ShowCHinese(72, 0, 4);  // ×Ó
-    // OLED_ShowCHinese(90, 0, 5);  // ¿Æ
-    // OLED_ShowCHinese(108, 0, 6); // ¼¼
+
+    // æ˜¾ç¤ºæ­£è´Ÿæµ®ç‚¹æ•°çš„ä»£ç 
+    //   float num1=-231.24;
+    //   float num2=23.375;
+
+    // OLED_ShowString(0,0,"Show Decimal",12,0);
+    // OLED_Showdecimal(0,4,num1,3,2,12, 0);
+    // OLED_Showdecimal(0,6,num2,2,3,16, 1);
 
     //  printf("U: %.2f V\r\n", adcGetBatteryVoltage());
-    //  Õâ¸öÊÇoledÇı¶¯ÀïÃæµÄ£¬ÊÇÏÔÊ¾Î»ÖÃµÄÒ»¸öº¯Êı£¬
-    //   MotorControl(0, testPWM, testPWM); // ç›´è??
+    //  ï¿½ï¿½ï¿½ï¿½ï¿½oledï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Î»ï¿½Ãµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    //   MotorControl(0, testPWM, testPWM); // ç›´ï¿½??
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
-    //   MotorControl(1, testPWM, testPWM); // åé??
+    //   MotorControl(1, testPWM, testPWM); // åï¿½??
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
     //   MotorControl(3, testPWM, testPWM); // å·¦è½¬
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
-    //   MotorControl(0, testPWM, testPWM); // ç›´è??
+    //   MotorControl(0, testPWM, testPWM); // ç›´ï¿½??
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
     //   MotorControl(4, testPWM, testPWM); // å³è½¬
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
-    //   MotorControl(1, testPWM, testPWM); // åé??
+    //   MotorControl(1, testPWM, testPWM); // åï¿½??
     //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // åœæ??
+    //   MotorControl(2, 0, 0); // åœï¿½??
     //   HAL_Delay(500);
     /* USER CODE END WHILE */
 
@@ -214,8 +222,18 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim == &htim1) // htim1 100HZ 10ms ÖĞ¶ÏÒ»´Î
+  if (htim == &htim1) // htim1 100HZ 10ms ï¿½Ğ¶ï¿½Ò»ï¿½ï¿½
   {
+    tim1Count++;
+
+    if (tim1Count == 100)
+    {
+      // OLED_ShowString(0, 0, (uint8_t *)"Voltage:", 14);
+      // sprintf(OledString, "%.2f V", adcGetBatteryVoltage());
+      // OLED_ShowString(0, 2, (uint8_t *)OledString, 14);
+      // memset(OledString, 0, sizeof(OledString));
+      // tim1Count = 0;
+    }
   }
 }
 

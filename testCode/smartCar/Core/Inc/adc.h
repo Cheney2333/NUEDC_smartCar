@@ -39,7 +39,6 @@ extern ADC_HandleTypeDef hadc1;
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
-float adcGetBatteryVoltage(void);
 
 /* USER CODE BEGIN Prototypes */
 

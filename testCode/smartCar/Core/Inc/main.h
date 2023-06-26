@@ -77,10 +77,10 @@ void Error_Handler(void);
 #define BIN1_GPIO_Port GPIOG
 #define BIN2_Pin GPIO_PIN_5
 #define BIN2_GPIO_Port GPIOG
-#define OLED_SCL_Pin GPIO_PIN_0
-#define OLED_SCL_GPIO_Port GPIOD
-#define OLED_SDA_Pin GPIO_PIN_1
-#define OLED_SDA_GPIO_Port GPIOD
+#define OLED_SCL_Pin GPIO_PIN_6
+#define OLED_SCL_GPIO_Port GPIOB
+#define OLED_SDA_Pin GPIO_PIN_7
+#define OLED_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -261,7 +261,7 @@ void USART2_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart == &huart2) // 判断中断�?
+  if (huart == &huart2) // 判断中断�?
   {
     if (g_ucUsart2ReceiveData == '0')
       MotorControl(0, 25, 25);
