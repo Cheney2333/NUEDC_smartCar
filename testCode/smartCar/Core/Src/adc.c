@@ -120,9 +120,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 /* USER CODE BEGIN 1 */
 float adcGetBatteryVoltage(void)
 {
-  HAL_ADC_Start(&hadc1);                                // 启动ADC转化
-  if (HAL_OK == HAL_ADC_PollForConversion(&hadc1, 50))       // 等待转化完成、超时时�?50ms
-    return (float)HAL_ADC_GetValue(&hadc1) / 4096 * 3.3 * 5; // 计算电池电压
+  HAL_ADC_Start(&hadc1);
+  if (HAL_OK == HAL_ADC_PollForConversion(&hadc1, 50))
+    return (float)HAL_ADC_GetValue(&hadc1) / 4096 * 3.3 * 5;
   return -1;
 }
 /* USER CODE END 1 */

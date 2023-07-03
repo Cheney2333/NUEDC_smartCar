@@ -34,6 +34,8 @@ void BMotor_Stop(void);
 
 void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM);
 
+void GetEncoderPulse(void);
+
 float CalActualSpeed(int pulse);
 
 #ifdef __cplusplus

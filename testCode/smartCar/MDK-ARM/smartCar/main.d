@@ -35,4 +35,8 @@ smartcar/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Core\Inc\usart.h ..\Core\Inc\gpio.h ..\Core\Inc\motor.h \
   ..\HARDWARE\OLED\oled.h ..\HARDWARE\OLED\oledfont.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
-  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h
+  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h \
+  ..\HARDWARE\MPU6050\IIC.h \
+  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\inttypes.h \
+  ..\HARDWARE\MPU6050\mpu6050.h ..\HARDWARE\MPU6050\inv_mpu.h \
+  ..\HARDWARE\MPU6050\inv_mpu_dmp_motion_driver.h

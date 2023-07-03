@@ -1,6 +1,8 @@
 #include "motor.h"
 #include "tim.h"
 
+extern short encoderPulse[2];
+
 void AMotor_Go() // LeftPostive:LIN1=1,LIN2=0,PB0=1,PB1=0
 {
   HAL_GPIO_WritePin(AIN1_GPIO_Port, AIN1_Pin, GPIO_PIN_SET);
@@ -31,6 +33,19 @@ void BMotor_Stop() // RightStop,RIN1=RIN2
 {
   HAL_GPIO_WritePin(BIN1_GPIO_Port, BIN1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(BIN2_GPIO_Port, BIN2_Pin, GPIO_PIN_SET);
+}
+
+/**
+ * @brief  读取定时器2和定时器3的计数值(编码器脉冲值)
+ * @retval None
+ */
+void GetEncoderPulse()
+{
+  encoderPulse[0] = ((short)__HAL_TIM_GET_COUNTER(&htim2)); // 电机A,左轮
+  encoderPulse[1] = -((short)__HAL_TIM_GET_COUNTER(&htim3));
+
+  __HAL_TIM_GET_COUNTER(&htim2) = 0; // 计数值重新清零
+  __HAL_TIM_GET_COUNTER(&htim3) = 0;
 }
 
 /**
@@ -68,7 +83,7 @@ void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM)
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
     break;
   case 4: // right
-		AMotor_Go();
+    AMotor_Go();
     BMotor_Back();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
@@ -85,5 +100,5 @@ void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM)
  */
 float CalActualSpeed(int pulse)
 {
-  return (float)(0.0101195 * pulse);
+  return (float)(1.349 * pulse);
 }

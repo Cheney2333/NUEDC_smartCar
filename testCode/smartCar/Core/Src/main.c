@@ -30,6 +30,10 @@
 #include "oled.h"
 #include "stdio.h"
 #include "string.h"
+#include "IIC.h"
+#include "mpu6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,10 +55,22 @@
 
 /* USER CODE BEGIN PV */
 int testPWM = 20;
-uint8_t g_ucUsart2ReceiveData; // ���洮��2���յ�����
-char OledString[10];
+uint8_t g_ucUsart2ReceiveData; // 保存串口2接收的数据
+char voltage[10];
+char mpuString[10];
+char leftSpeed[20];
+char rightSpeed[20];
 int oledFlag = 0;
 int tim1Count = 0;
+float batteryVoltage = 0.0;
+float pitch, roll, yaw;    // 欧拉角
+short aacx, aacy, aacz;    // 加速度传感器原始数据
+short gyrox, gyroy, gyroz; // 陀螺仪原始数据
+float ax, ay, az;
+float temp; // 温度
+
+short encoderPulse[2] = {0}; // 编码器脉冲数
+float c_leftSpeed, c_rightSpeed;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,9 +121,12 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+
   OLED_Init(); // 初始化OLED
   OLED_Clear();
-  OLED_ShowString(0, 2, "hello world!", 12, 0); // 正相显示6X8字符串
+  // MPU_Init();     // MPU6050初始化
+  // mpu_dmp_init(); // dmp初始化
+  // printf("初始化成功！\r\n");
 
   // OLED_ShowCHinese(0, 4, 0, 1);  // 反相显示汉字“独”
   // OLED_ShowCHinese(16, 4, 1, 1); // 反相显示汉字“角”
@@ -121,17 +140,41 @@ int main(void)
   // OLED_DrawBMP(90, 0, 122, 4, BMP1, 0); // 正相显示图片BMP1
   // OLED_DrawBMP(90, 4, 122, 8, BMP1, 1); // 反相显示图片BMP1
 
-  // OLED_HorizontalShift(0x26);                              // 全屏水平向右滚动播放
-  HAL_TIM_Base_Start_IT(&htim1);                           // ������ʱ��1�ж�
-  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // ����2��������
+  // OLED_HorizontalShift(0x26);                           // 全屏水平向右滚动播放
+  HAL_TIM_Base_Start_IT(&htim1);                           // 启动定时器1中断
+  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收中断
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_2);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // start encoder timer
+  __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
+  __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE); // start encoder timer to update interrupts and prevent overflow processing
+
+  __HAL_TIM_SET_COUNTER(&htim2, 30000);
+  __HAL_TIM_SET_COUNTER(&htim3, 30000); // initialize encoder timing and set it to 3000
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    OLED_ShowString(0, 0, (char *)"batteryVoltage:", 12, 0);
+    sprintf(voltage, "%.1fV", batteryVoltage);
+    OLED_ShowString(96, 0, (char *)voltage, 12, 0);
+
+    sprintf(leftSpeed, "leftSpeed:%.2fcm/s", c_leftSpeed);
+    OLED_ShowString(0, 2, (char *)leftSpeed, 12, 0);
+    sprintf(rightSpeed, "rightSpeed:%.2fcm/s", c_rightSpeed);
+    OLED_ShowString(0, 4, (char *)rightSpeed, 12, 0);
+
+    // sprintf(mpuString, "roll:%.1f", roll);
+    // OLED_ShowString(0, 2, (char *)mpuString, 12, 0);
+    // sprintf(mpuString, "pitch:%.1f", pitch);
+    // OLED_ShowString(0, 4, (char *)mpuString, 12, 0);
+    // sprintf(mpuString, "yaw:%.1f", yaw);
+    // OLED_ShowString(0, 6, (char *)mpuString, 12, 0);
 
     // 显示正负浮点数的代码
     //   float num1=-231.24;
@@ -140,33 +183,6 @@ int main(void)
     // OLED_ShowString(0,0,"Show Decimal",12,0);
     // OLED_Showdecimal(0,4,num1,3,2,12, 0);
     // OLED_Showdecimal(0,6,num2,2,3,16, 1);
-
-    //  printf("U: %.2f V\r\n", adcGetBatteryVoltage());
-    //  �����oled��������ģ�����ʾλ�õ�һ��������
-    //   MotorControl(0, testPWM, testPWM); // 直�??
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
-    //   MotorControl(1, testPWM, testPWM); // 后�??
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
-    //   MotorControl(3, testPWM, testPWM); // 左转
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
-    //   MotorControl(0, testPWM, testPWM); // 直�??
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
-    //   MotorControl(4, testPWM, testPWM); // 右转
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
-    //   MotorControl(1, testPWM, testPWM); // 后�??
-    //   HAL_Delay(1000);
-    //   MotorControl(2, 0, 0); // 停�??
-    //   HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -222,21 +238,34 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim == &htim1) // htim1 100HZ 10ms �ж�һ��
+  if (htim == &htim1) // htim1 100Hz 10ms
   {
     tim1Count++;
 
-    if (tim1Count == 100)
+    GetEncoderPulse();
+    c_leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
+    c_rightSpeed = CalActualSpeed(encoderPulse[1]);
+
+    if (tim1Count > 100)
     {
-      // OLED_ShowString(0, 0, (uint8_t *)"Voltage:", 14);
-      // sprintf(OledString, "%.2f V", adcGetBatteryVoltage());
-      // OLED_ShowString(0, 2, (uint8_t *)OledString, 14);
-      // memset(OledString, 0, sizeof(OledString));
-      // tim1Count = 0;
+      batteryVoltage = adcGetBatteryVoltage();
+      // printf("test");
+      tim1Count = 0;
     }
   }
 }
-
+void MPU6050_GetData(void)
+{
+  while (mpu_dmp_get_data(&pitch, &roll, &yaw))
+    ; // 必须要用while等待，才能读取成功
+  // MPU_Get_Accelerometer(&aacx, &aacy, &aacz); // 得到加速度传感器数据
+  // ax = (float)aacx / 16384.0;
+  // ay = (float)aacy / 16384.0;
+  // az = (float)aacz / 16384.0;
+  MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz); // 得到陀螺仪数据
+  // temp = MPU_Get_Temperature();                        // 得到温度信息
+  printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
+}
 /* USER CODE END 4 */
 
 /**
