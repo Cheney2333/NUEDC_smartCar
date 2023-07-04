@@ -63,10 +63,6 @@ void MPU6050_GetData(void);
 #define CCD_SI_GPIO_Port GPIOC
 #define CCD_CLK_Pin GPIO_PIN_2
 #define CCD_CLK_GPIO_Port GPIOC
-#define AMotorEncoderA_Pin GPIO_PIN_0
-#define AMotorEncoderA_GPIO_Port GPIOA
-#define AMotorEncoderB_Pin GPIO_PIN_1
-#define AMotorEncoderB_GPIO_Port GPIOA
 #define BMotorEncoderA_Pin GPIO_PIN_6
 #define BMotorEncoderA_GPIO_Port GPIOA
 #define BMotorEncoderB_Pin GPIO_PIN_7

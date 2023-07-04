@@ -1,16 +1,14 @@
 #include "pid.h"
 
-extern float targetSpeed;
-
 /**
  * @brief  PID相关参数的初始化
  * @param  PID的结构体指针
  */
 void PID_Init(PID *p)
 {
-	p->Velcity_Kp = 0.0;
-	p->Velcity_Ki = 0.1;
-	p->Velcity_Kd = 0.0;
+	p->Kp = 0.5;
+	p->Ki = 0.01;
+	p->Kd = 0.0;
 	p->Ur = 50;
 	p->PID_is_Enable = 1;
 	p->Un = 0;
@@ -28,7 +26,7 @@ void Speed_PID(float targetSpeed, float currentSpeed, PID *p)
 	{
 		float En = targetSpeed - currentSpeed; // 误差值
 
-		p->Un += p->Velcity_Kp * (En - p->En_1) + p->Velcity_Ki * En + p->Velcity_Kd * (En - 2 * p->En_1 + p->En_2); // 增量式PID
+		p->Un += p->Kp * (En - p->En_1) + p->Ki * En + p->Kd * (En - 2 * p->En_1 + p->En_2); // 增量式PID
 
 		p->En_2 = p->En_1;
 		p->En_1 = En;

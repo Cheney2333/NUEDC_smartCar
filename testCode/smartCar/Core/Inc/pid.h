@@ -30,9 +30,9 @@ extern "C"
   typedef struct
   {
     // 相关速度PID参数
-    float Velcity_Kp;
-    float Velcity_Ki;
-    float Velcity_Kd;
+    float Kp;
+    float Ki;
+    float Kd;
     float Ur; // 限幅值
 
     int PID_is_Enable; // PID使能
