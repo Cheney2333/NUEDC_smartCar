@@ -100,5 +100,5 @@ void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM)
  */
 float CalActualSpeed(int pulse)
 {
-  return (float)(1.349 * pulse);
+  return (float)(0.01349 * pulse); // unit: m/s
 }

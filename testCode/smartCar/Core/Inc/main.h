@@ -57,6 +57,12 @@ void MPU6050_GetData(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define CCD_AO_Pin GPIO_PIN_0
+#define CCD_AO_GPIO_Port GPIOC
+#define CCD_SI_Pin GPIO_PIN_1
+#define CCD_SI_GPIO_Port GPIOC
+#define CCD_CLK_Pin GPIO_PIN_2
+#define CCD_CLK_GPIO_Port GPIOC
 #define AMotorEncoderA_Pin GPIO_PIN_0
 #define AMotorEncoderA_GPIO_Port GPIOA
 #define AMotorEncoderB_Pin GPIO_PIN_1

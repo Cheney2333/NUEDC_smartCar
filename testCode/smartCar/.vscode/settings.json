@@ -5,6 +5,7 @@
         "*.wxss": "css",
         "*.wxs": "javascript",
         "tim.h": "c",
-        "motor.h": "c"
+        "motor.h": "c",
+        "pid.h": "c"
     }
 }

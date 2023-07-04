@@ -23,10 +23,10 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "motor.h"
+#include "pid.h"
 #include "oled.h"
 #include "stdio.h"
 #include "string.h"
@@ -34,11 +34,13 @@
 #include "mpu6050.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
+#include "CCD_TSL1401.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+PID leftMotor_PID;
+PID rightMotor_PID;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,10 +58,10 @@
 /* USER CODE BEGIN PV */
 int testPWM = 20;
 uint8_t g_ucUsart2ReceiveData; // 保存串口2接收的数据
-char voltage[10];
+char voltage[20];
 char mpuString[10];
-char leftSpeed[20];
-char rightSpeed[20];
+char speedString[22];
+char CCDString[20];
 int oledFlag = 0;
 int tim1Count = 0;
 float batteryVoltage = 0.0;
@@ -69,14 +71,20 @@ short gyrox, gyroy, gyroz; // 陀螺仪原始数据
 float ax, ay, az;
 float temp; // 温度
 
+uint32_t CCD_Value[128]; // CCD数据数组
+uint32_t Threshold = 0;  // CCD阈值
+
 short encoderPulse[2] = {0}; // 编码器脉冲数
-float c_leftSpeed, c_rightSpeed;
+float leftSpeed, rightSpeed;
+
+float leftTargetSpeed = 0.10;
+float rightTargetSpeed = 0.10;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void Main_Loop(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -100,7 +108,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  PID_Init(&leftMotor_PID);
+  PID_Init(&rightMotor_PID);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -128,19 +137,6 @@ int main(void)
   // mpu_dmp_init(); // dmp初始化
   // printf("初始化成功！\r\n");
 
-  // OLED_ShowCHinese(0, 4, 0, 1);  // 反相显示汉字“独”
-  // OLED_ShowCHinese(16, 4, 1, 1); // 反相显示汉字“角”
-  // OLED_ShowCHinese(32, 4, 2, 1); // 反相显示汉字“兽”
-  // OLED_ShowCHinese(0, 6, 0, 0);  // 正相显示汉字“独”
-  // OLED_ShowCHinese(16, 6, 1, 0); // 正相显示汉字“角”
-  // OLED_ShowCHinese(32, 6, 2, 0); // 正相显示汉字“兽”
-
-  // OLED_ShowNum(48, 4, 6, 1, 16, 0);     // 正相显示1位8X16数字“6”
-  // OLED_ShowNum(48, 7, 77, 2, 12, 1);    // 反相显示2位6X8数字“77”
-  // OLED_DrawBMP(90, 0, 122, 4, BMP1, 0); // 正相显示图片BMP1
-  // OLED_DrawBMP(90, 4, 122, 8, BMP1, 1); // 反相显示图片BMP1
-
-  // OLED_HorizontalShift(0x26);                           // 全屏水平向右滚动播放
   HAL_TIM_Base_Start_IT(&htim1);                           // 启动定时器1中断
   HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收中断
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
@@ -149,6 +145,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_2);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // start encoder timer
+  HAL_ADCEx_Calibration_Start(&CCD_AO_hadc);
   __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE); // start encoder timer to update interrupts and prevent overflow processing
 
@@ -160,14 +157,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    OLED_ShowString(0, 0, (char *)"batteryVoltage:", 12, 0);
-    sprintf(voltage, "%.1fV", batteryVoltage);
-    OLED_ShowString(96, 0, (char *)voltage, 12, 0);
-
-    sprintf(leftSpeed, "leftSpeed:%.2fcm/s", c_leftSpeed);
-    OLED_ShowString(0, 2, (char *)leftSpeed, 12, 0);
-    sprintf(rightSpeed, "rightSpeed:%.2fcm/s", c_rightSpeed);
-    OLED_ShowString(0, 4, (char *)rightSpeed, 12, 0);
+    Main_Loop();
 
     // sprintf(mpuString, "roll:%.1f", roll);
     // OLED_ShowString(0, 2, (char *)mpuString, 12, 0);
@@ -243,8 +233,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     tim1Count++;
 
     GetEncoderPulse();
-    c_leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
-    c_rightSpeed = CalActualSpeed(encoderPulse[1]);
+    leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
+    rightSpeed = CalActualSpeed(encoderPulse[1]);
+
+    Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // calculate the PID parameters for the left motor
+    Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
+
+    MotorControl(0, leftMotor_PID.PWM, rightMotor_PID.PWM);
+
+    printf("data:%.1f,%.1f,%.1f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
+
+    CCD_Read(CCD_Value);
+    CCD_Data_Transform(CCD_Value);
+    Threshold = CCD_CalcuThreshold(CCD_Value);
+    CCD_Binarization(CCD_Value, Threshold);
+    CCD_CalcuPosition(CCD_Value);
+    CCD_Value_Clear(CCD_Value);
 
     if (tim1Count > 100)
     {
@@ -254,7 +258,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
   }
 }
-void MPU6050_GetData(void)
+void MPU6050_GetData()
 {
   while (mpu_dmp_get_data(&pitch, &roll, &yaw))
     ; // 必须要用while等待，才能读取成功
@@ -265,6 +269,24 @@ void MPU6050_GetData(void)
   MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz); // 得到陀螺仪数据
   // temp = MPU_Get_Temperature();                        // 得到温度信息
   printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
+}
+
+void Main_Loop()
+{
+  // OLED_ShowString(0, 0, (char *)"", 12, 0);
+  sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
+  OLED_ShowString(0, 0, (char *)voltage, 12, 0);
+
+  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
+  OLED_ShowString(0, 2, (char *)speedString, 12, 0);
+  
+  sprintf(CCDString, "threshold:%d", Threshold);
+  OLED_ShowString(0, 4, (char *)CCDString, 12, 0);
+
+  sprintf(CCDString, "left:%d", Position[0]);
+  OLED_ShowString(0, 6, (char *)CCDString, 12, 0);
+  sprintf(CCDString, "right:%d", Position[1]);
+  OLED_ShowString(50, 6, (char *)CCDString, 12, 0);
 }
 /* USER CODE END 4 */
 
