@@ -108,8 +108,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  PID_Init(&leftMotor_PID);
-  PID_Init(&rightMotor_PID);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -152,6 +150,9 @@ int main(void)
 
   __HAL_TIM_SET_COUNTER(&htim2, 30000);
   __HAL_TIM_SET_COUNTER(&htim3, 30000); // initialize encoder timing and set it to 3000
+
+  PID_Init(&leftMotor_PID);
+  PID_Init(&rightMotor_PID);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -217,8 +218,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1) // htim1 100Hz 10ms
   {
-    tim1Count++;
-
     GetEncoderPulse();
     leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     rightSpeed = CalActualSpeed(encoderPulse[1]);
@@ -226,7 +225,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // calculate the PID parameters for the left motor
     Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
 
-    MotorControl(0, leftMotor_PID.PWM, rightMotor_PID.PWM);
+    MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+    // MotorControl(25, 25);
 
     printf("data:%.1f,%.1f,%.1f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
 
@@ -237,7 +237,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // CCD_CalcuPosition(CCD_Value);
     // CCD_Value_Clear(CCD_Value);
 
-    if (tim1Count > 100)
+    if (++tim1Count > 100)
     {
       batteryVoltage = adcGetBatteryVoltage();
       // printf("test");

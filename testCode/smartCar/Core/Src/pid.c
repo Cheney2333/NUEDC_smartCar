@@ -6,8 +6,8 @@
  */
 void PID_Init(PID *p)
 {
-	p->Kp = 0.5;
-	p->Ki = 0.01;
+	p->Kp = 2.5;
+	p->Ki = 0.05;
 	p->Kd = 0.0;
 	p->Ur = 50;
 	p->PID_is_Enable = 1;

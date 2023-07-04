@@ -249,15 +249,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   if (huart == &huart2) // 判断中断�?
   {
     if (g_ucUsart2ReceiveData == '0')
-      MotorControl(0, 25, 25);
+      MotorControl(25, 25);
     if (g_ucUsart2ReceiveData == '1')
-      MotorControl(1, 25, 25);
+      MotorControl(-25, -25);
     if (g_ucUsart2ReceiveData == '2')
-      MotorControl(2, 0, 0);
+      MotorControl(0, 0);
     if (g_ucUsart2ReceiveData == '3')
-      MotorControl(3, 20, 20);
+      MotorControl(-20, 20);
     if (g_ucUsart2ReceiveData == '4')
-      MotorControl(4, 20, 20);
+      MotorControl(20, -20);
     HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 继续进行中断接收
   }
 }

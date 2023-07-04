@@ -53,43 +53,42 @@ void GetEncoderPulse()
  *    @param motorDirection,LeftMortorPWM,rightMotorPWm
  *    @retval None
  */
-void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM)
+void MotorControl(int AMotorPWM, int BMotorPWM)
 {
-  switch (motorDirection)
+  if (AMotorPWM > 0 && BMotorPWM > 0) // 前进
   {
-  case 0: // forward
     AMotor_Go();
     BMotor_Go();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
-
-    break;
-  case 1: // backward
-    AMotor_Back();
-    BMotor_Back();
-    __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
-    __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
-    break;
-  case 2: // stop
+  }
+  if (AMotorPWM == 0 &&BMotorPWM == 0) // 停车
+  {
     AMotor_Stop();
     BMotor_Stop();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
-    break;
-  case 3: // left
+  }
+  if (AMotorPWM < 0 && BMotorPWM < 0) // 后退
+  {
     AMotor_Back();
-    BMotor_Go();
-    __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
-    __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
-    break;
-  case 4: // right
+    BMotor_Back();
+    __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, -AMotorPWM);
+    __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, -BMotorPWM);
+  }
+  if (AMotorPWM > 0 && BMotorPWM < 0) // 原地右转
+  {
     AMotor_Go();
     BMotor_Back();
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
+    __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, -BMotorPWM);
+  }
+  if (AMotorPWM < 0 && BMotorPWM > 0) // 原地左转
+  {
+    AMotor_Back();
+    BMotor_Go();
+    __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, -AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
-    break;
-  default:
-    break;
   }
 }
 

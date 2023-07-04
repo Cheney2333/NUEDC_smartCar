@@ -32,7 +32,7 @@ void BMotor_Go(void);
 void BMotor_Back(void);
 void BMotor_Stop(void);
 
-void MotorControl(char motorDirection, int AMotorPWM, int BMotorPWM);
+void MotorControl(int AMotorPWM, int BMotorPWM);
 
 void GetEncoderPulse(void);
 
