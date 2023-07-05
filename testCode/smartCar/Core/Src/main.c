@@ -132,9 +132,11 @@ int main(void)
 
   OLED_Init(); // 初始化OLED
   OLED_Clear();
-  // MPU_Init();     // MPU6050初始化
-  // mpu_dmp_init(); // dmp初始化
+  HAL_Delay(100);
+  MPU_Init();     // MPU6050初始化
+  mpu_dmp_init(); // dmp初始化
   // printf("初始化成功！\r\n");
+  HAL_Delay(20);
 
   HAL_TIM_Base_Start_IT(&htim1);                           // 启动定时器1中断
   HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收中断
@@ -215,19 +217,21 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
     GetEncoderPulse();
     leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     rightSpeed = CalActualSpeed(encoderPulse[1]);
 
-    Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
-    Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
+    // Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
+    // Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
 
-    MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+    // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+
     // MotorControl(25, 25);
 
-    printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
+    // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
 
     // CCD_Read(CCD_Value);
     // CCD_Data_Transform(CCD_Value);
@@ -236,7 +240,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // CCD_CalcuPosition(CCD_Value);
     // CCD_Value_Clear(CCD_Value);
 
-    if (++tim1Count > 100)
+    if (tim1Count > 10)
+    {
+      MPU6050_GetData();
+    }
+
+    if (tim1Count > 100)
     {
       batteryVoltage = adcGetBatteryVoltage();
       // printf("test");
@@ -244,7 +253,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
   }
 }
-void MPU6050_GetData()
+void MPU6050_GetData() // 获取MPU6050的数值
 {
   while (mpu_dmp_get_data(&pitch, &roll, &yaw))
     ; // 必须要用while等待，才能读取成功
