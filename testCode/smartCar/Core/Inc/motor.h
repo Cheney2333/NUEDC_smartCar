@@ -34,6 +34,9 @@ void BMotor_Stop(void);
 
 void MotorControl(int AMotorPWM, int BMotorPWM);
 
+void LeftBend(float currentAngle);  // 左直角弯
+void RightBend(float currentAngle); // 右直角弯
+
 void GetEncoderPulse(void);
 
 float CalActualSpeed(int pulse);

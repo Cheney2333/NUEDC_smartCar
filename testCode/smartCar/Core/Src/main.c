@@ -70,6 +70,7 @@ short aacx, aacy, aacz;    // 加速度传感器原始数据
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
 float ax, ay, az;
 float temp; // 温度
+float refrenceAngle = 0.0;
 
 uint32_t CCD_Value[128]; // CCD数据数组
 uint32_t Threshold = 0;  // CCD阈值
@@ -77,8 +78,7 @@ uint32_t Threshold = 0;  // CCD阈值
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
 
-float leftTargetSpeed = 0.10;
-float rightTargetSpeed = 0.10;
+float leftTargetSpeed = 0.10, rightTargetSpeed = -0.10;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -120,23 +120,20 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
-  MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
-
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
   OLED_Init(); // 初始化OLED
   OLED_Clear();
-  HAL_Delay(100);
+
   MPU_Init();     // MPU6050初始化
   mpu_dmp_init(); // dmp初始化
   // printf("初始化成功！\r\n");
-  HAL_Delay(20);
 
   HAL_TIM_Base_Start_IT(&htim1);                           // 启动定时器1中断
   HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收中断
@@ -224,12 +221,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     rightSpeed = CalActualSpeed(encoderPulse[1]);
 
-    // Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
-    // Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
+    Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
+    Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
 
     // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
 
     // MotorControl(25, 25);
+
+    MPU6050_GetData();
 
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
 
@@ -240,12 +239,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // CCD_CalcuPosition(CCD_Value);
     // CCD_Value_Clear(CCD_Value);
 
-    if (tim1Count > 10)
-    {
-      MPU6050_GetData();
-    }
-
-    if (tim1Count > 100)
+    if (tim1Count > 20)
     {
       batteryVoltage = adcGetBatteryVoltage();
       // printf("test");
@@ -282,6 +276,13 @@ void Main_Loop()
   OLED_ShowString(0, 6, (char *)CCDString, 12, 0);
   sprintf(CCDString, "right:%d", Position[1]);
   OLED_ShowString(50, 6, (char *)CCDString, 12, 0);
+
+  // MotorControl(0, 0);
+  // refrenceAngle = pitch;
+  // LeftBend(refrenceAngle);
+  // MotorControl(0, 0);
+  // refrenceAngle = pitch;
+  // RightBend(refrenceAngle);
 }
 /* USER CODE END 4 */
 
