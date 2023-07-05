@@ -7,9 +7,9 @@
 void PID_Init(PID *p)
 {
 	p->Kp = 2.5;
-	p->Ki = 0.05;
+	p->Ki = 0.5;
 	p->Kd = 0.0;
-	p->Ur = 50;
+	p->Ur = 60;
 	p->PID_is_Enable = 1;
 	p->Un = 0;
 	p->En_1 = 0;

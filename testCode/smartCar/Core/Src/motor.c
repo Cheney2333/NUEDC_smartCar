@@ -18,7 +18,7 @@ void AMotor_Stop() // LeftStop,LIN1=LIN2
   HAL_GPIO_WritePin(AIN1_GPIO_Port, AIN1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(AIN2_GPIO_Port, AIN2_Pin, GPIO_PIN_SET);
 }
-//-------------------------------------------------
+//------------------------------------------------------------
 void BMotor_Go() // RightPositive,RIN1=0,RIN2=1,PA6=0,PA7=1
 {
   HAL_GPIO_WritePin(BIN1_GPIO_Port, BIN1_Pin, GPIO_PIN_SET);

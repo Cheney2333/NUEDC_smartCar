@@ -36,9 +36,9 @@ extern "C"
     float Ur; // 限幅值
 
     int PID_is_Enable; // PID使能
-    int Un;            // 期望输出值
-    int En_1;          // 上一次的误差值
-    int En_2;          // 上上次的误差值
+    float Un;            // 期望输出值
+    float En_1;          // 上一次的误差值
+    float En_2;          // 上上次的误差值
     int PWM;           // 输出PWM值
 
   } PID;
