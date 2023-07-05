@@ -6,12 +6,12 @@
  */
 void PID_Init(PID *p)
 {
-	p->Kp = 2.5;
-	p->Ki = 0.5;
-	p->Kd = 0.0;
+	p->Kp = 25.0;
+	p->Ki = 2.5;
+	p->Kd = 2.5;
 	p->Ur = 60;
 	p->PID_is_Enable = 1;
-	p->Un = 0;
+	p->Un = 3;
 	p->En_1 = 0;
 	p->En_2 = 0;
 	p->PWM = 0;
@@ -31,7 +31,7 @@ void Speed_PID(float targetSpeed, float currentSpeed, PID *p)
 		p->En_2 = p->En_1;
 		p->En_1 = En;
 
-		p->PWM = p->Un;
+		p->PWM = (int)p->Un;
 
 		/*输出限幅*/
 		if (p->PWM > p->Ur)

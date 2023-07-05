@@ -148,8 +148,8 @@ int main(void)
   __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE); // start encoder timer to update interrupts and prevent overflow processing
 
-  __HAL_TIM_SET_COUNTER(&htim2, 30000);
-  __HAL_TIM_SET_COUNTER(&htim3, 30000); // initialize encoder timing and set it to 3000
+  __HAL_TIM_SET_COUNTER(&htim2, 0);
+  __HAL_TIM_SET_COUNTER(&htim3, 0); // initialize encoder timing and set it to 3000
 
   PID_Init(&leftMotor_PID);
   PID_Init(&rightMotor_PID);
@@ -227,7 +227,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
     // MotorControl(25, 25);
 
-    printf("data:%.1f,%.1f,%.1f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
+    printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
 
     // CCD_Read(CCD_Value);
     // CCD_Data_Transform(CCD_Value);

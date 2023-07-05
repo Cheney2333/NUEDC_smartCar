@@ -62,7 +62,7 @@ void MotorControl(int AMotorPWM, int BMotorPWM)
     __HAL_TIM_SET_COMPARE(motor_TIM, AMotorChannel, AMotorPWM);
     __HAL_TIM_SET_COMPARE(motor_TIM, BMotorChannel, BMotorPWM);
   }
-  if (AMotorPWM == 0 &&BMotorPWM == 0) // 停车
+  if (AMotorPWM == 0 && BMotorPWM == 0) // 停车
   {
     AMotor_Stop();
     BMotor_Stop();
