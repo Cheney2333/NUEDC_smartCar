@@ -245,7 +245,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
     if (Uart2RxBuff == 0x0A) // 接收结束标志位
     {
-      sscanf((const char *)Uart2DataBuff, "x = %d, y = %d", &RedX, &RedY);
+      sscanf((const char *)Uart2DataBuff, "x=%d,y=%d\r\n", &RedX, &RedY);
       memset(Uart2DataBuff, 0, sizeof(Uart2DataBuff)); // 清空缓存数组
       RxLine = 0;                                      // 清空接收长度
     }
