@@ -243,9 +243,38 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     RxLine++;                                // 每接收到一个数据，进入回调数据长度加1
     Uart2DataBuff[RxLine - 1] = Uart2RxBuff; // 把每次接收到的数据保存到缓存数组
 
-    if (Uart2RxBuff == 0x0A) // 接收结束标志位
+    if (Uart2RxBuff == '\n') // 接收结束标志位
     {
-      sscanf((const char *)Uart2DataBuff, "x=%d,y=%d\r\n", &RedX, &RedY);
+      // uint8_t start = 0;
+      // RedX = 0;
+      // RedY = 0;
+      // for (int i = 1; i < strlen((const char *)Uart2DataBuff); i++)
+      // {
+      //   if (Uart2DataBuff[i] == '\r')
+      //     break;                          // 结束标志位，跳出循环
+      //   else if (Uart2DataBuff[i] == ',') // 逗号分隔符
+      //   {
+      //     start = 2; // 进入Y坐标
+      //     i += 2;    // 跳过'y='
+      //     continue;
+      //   }
+      //   else if (start == 1)
+      //   {
+      //     RedX += RedX * 10 + (int)(Uart2DataBuff[i] - '0');
+      //   }
+      //   else if (start == 2)
+      //     RedY += RedY * 10 + (int)(Uart2DataBuff[i] - '0');
+      //   else if (Uart2DataBuff[i] == '=') // 等号开始收集数据
+      //   {
+      //     start = 1;
+      //     continue;
+      //   }
+      // }
+      if (sscanf((const char *)Uart2DataBuff, "x=%d,y=%d\r\n", &RedX, &RedY) == 2)
+      {
+      }
+
+      // printf("x = %d, y = %d\r\n", RedX, RedY);
       memset(Uart2DataBuff, 0, sizeof(Uart2DataBuff)); // 清空缓存数组
       RxLine = 0;                                      // 清空接收长度
     }

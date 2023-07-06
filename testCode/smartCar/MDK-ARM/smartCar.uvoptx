@@ -210,6 +210,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>Uart2DataBuff[5000]</ItemText>
         </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Uart2RxFlag,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

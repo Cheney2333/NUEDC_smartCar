@@ -62,6 +62,7 @@ char voltage[20];
 char mpuString[10];
 char speedString[22];
 char CCDString[20];
+char colorPostion[20];
 int tim1Count = 0;
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
@@ -76,9 +77,10 @@ float leftSpeed = 0, rightSpeed = 0;
 
 float leftTargetSpeed = 0.30, rightTargetSpeed = 0.30;
 
-uint8_t Uart2RxBuff;      // 进入中断接收数据的数组
+uint8_t Uart2RxBuff;         // 进入中断接收数据的数组
 uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
 int RxLine = 0;              // 接收到的数据长度
+int Uart2RxFlag = 0;         // 串口2接收标志位
 
 int RedX = 0, RedY = 0;
 /* USER CODE END PV */
@@ -258,6 +260,11 @@ void Main_Loop()
 
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
+
+  sprintf(colorPostion, "x:%d                 ", RedX);
+  OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
+  sprintf(colorPostion, "y:%d                 ", RedY);
+  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
 }
 /* USER CODE END 4 */
 
