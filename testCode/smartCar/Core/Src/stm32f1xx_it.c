@@ -245,38 +245,18 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
     if (Uart2RxBuff == '\n') // 接收结束标志位
     {
-      // uint8_t start = 0;
-      // RedX = 0;
-      // RedY = 0;
-      // for (int i = 1; i < strlen((const char *)Uart2DataBuff); i++)
-      // {
-      //   if (Uart2DataBuff[i] == '\r')
-      //     break;                          // 结束标志位，跳出循环
-      //   else if (Uart2DataBuff[i] == ',') // 逗号分隔符
-      //   {
-      //     start = 2; // 进入Y坐标
-      //     i += 2;    // 跳过'y='
-      //     continue;
-      //   }
-      //   else if (start == 1)
-      //   {
-      //     RedX += RedX * 10 + (int)(Uart2DataBuff[i] - '0');
-      //   }
-      //   else if (start == 2)
-      //     RedY += RedY * 10 + (int)(Uart2DataBuff[i] - '0');
-      //   else if (Uart2DataBuff[i] == '=') // 等号开始收集数据
-      //   {
-      //     start = 1;
-      //     continue;
-      //   }
-      // }
       if (sscanf((const char *)Uart2DataBuff, "x=%d,y=%d\r\n", &RedX, &RedY) == 2)
       {
       }
-
       // printf("x = %d, y = %d\r\n", RedX, RedY);
       memset(Uart2DataBuff, 0, sizeof(Uart2DataBuff)); // 清空缓存数组
       RxLine = 0;                                      // 清空接收长度
+    }
+
+    if (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_ORE)) // 溢出标志
+    {
+      uint32_t temp = USART2->SR;
+      temp = USART2->DR;
     }
 
     Uart2RxBuff = 0;

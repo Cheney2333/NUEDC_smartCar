@@ -261,9 +261,9 @@ void Main_Loop()
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
 
-  sprintf(colorPostion, "x:%d                 ", RedX);
+  sprintf(colorPostion, "x:%d                ", RedX);
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
-  sprintf(colorPostion, "y:%d                 ", RedY);
+  sprintf(colorPostion, "y:%d                ", RedY);
   OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
 }
 /* USER CODE END 4 */
