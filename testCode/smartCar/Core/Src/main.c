@@ -58,7 +58,6 @@ PID rightMotor_PID;
 
 /* USER CODE BEGIN PV */
 int testPWM = 20;
-uint8_t g_ucUsart2ReceiveData; // 保存串口2接收的数据
 char voltage[20];
 char mpuString[10];
 char speedString[22];
@@ -66,10 +65,7 @@ char CCDString[20];
 int tim1Count = 0;
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
-short aacx, aacy, aacz;    // 加速度传感器原始数据
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
-float ax, ay, az;
-float temp; // 温度
 float refrenceAngle = 0.0;
 
 uint32_t CCD_Value[128]; // CCD数据数组
@@ -78,7 +74,13 @@ uint32_t Threshold = 0;  // CCD阈值
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
 
-float leftTargetSpeed = 0.10, rightTargetSpeed = -0.10;
+float leftTargetSpeed = 0.30, rightTargetSpeed = 0.30;
+
+uint8_t Uart2RxBuff;      // 进入中断接收数据的数组
+uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
+int RxLine = 0;              // 接收到的数据长度
+
+int RedX = 0, RedY = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -131,12 +133,11 @@ int main(void)
   OLED_Init(); // 初始化OLED
   OLED_Clear();
 
-  MPU_Init();     // MPU6050初始化
-  mpu_dmp_init(); // dmp初始化
-  // printf("初始化成功！\r\n");
+  // MPU_Init();     // MPU6050初始化
+  // mpu_dmp_init(); // dmp初始化
 
-  HAL_TIM_Base_Start_IT(&htim1);                           // 启动定时器1中断
-  HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 串口2接收中断
+  HAL_TIM_Base_Start_IT(&htim1);                 // 启动定时器1中断
+  HAL_UART_Receive_IT(&huart2, &Uart2RxBuff, 1); // 串口2接收中断
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_1);
@@ -228,16 +229,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     // MotorControl(25, 25);
 
-    MPU6050_GetData();
+    // MPU6050_GetData();
 
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
 
-    // CCD_Read(CCD_Value);
-    // CCD_Data_Transform(CCD_Value);
-    // Threshold = CCD_CalcuThreshold(CCD_Value);
-    // CCD_Binarization(CCD_Value, Threshold);
-    // CCD_CalcuPosition(CCD_Value);
-    // CCD_Value_Clear(CCD_Value);
+    printf("x = %d, y = %d\r\n", RedX, RedY);
 
     if (tim1Count > 20)
     {
@@ -250,39 +246,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void MPU6050_GetData() // 获取MPU6050的数值
 {
   while (mpu_dmp_get_data(&pitch, &roll, &yaw))
-    ; // 必须要用while等待，才能读取成功
-  // MPU_Get_Accelerometer(&aacx, &aacy, &aacz); // 得到加速度传感器数据
-  // ax = (float)aacx / 16384.0;
-  // ay = (float)aacy / 16384.0;
-  // az = (float)aacz / 16384.0;
-  MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz); // 得到陀螺仪数据
-  // temp = MPU_Get_Temperature();                        // 得到温度信息
+    ;                                                  // 必须要用while等待，才能读取成功
+  MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz);           // 得到陀螺仪数据
   printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
 }
 
 void Main_Loop()
 {
-  // OLED_ShowString(0, 0, (char *)"", 12, 0);
   sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
   OLED_ShowString(0, 0, (char *)voltage, 12, 0);
 
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
-
-  sprintf(CCDString, "threshold:%d", Threshold);
-  OLED_ShowString(0, 4, (char *)CCDString, 12, 0);
-
-  sprintf(CCDString, "left:%d", Position[0]);
-  OLED_ShowString(0, 6, (char *)CCDString, 12, 0);
-  sprintf(CCDString, "right:%d", Position[1]);
-  OLED_ShowString(50, 6, (char *)CCDString, 12, 0);
-
-  // MotorControl(0, 0);
-  // refrenceAngle = pitch;
-  // LeftBend(refrenceAngle);
-  // MotorControl(0, 0);
-  // refrenceAngle = pitch;
-  // RightBend(refrenceAngle);
 }
 /* USER CODE END 4 */
 

@@ -23,6 +23,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "motor.h"
+#include "string.h"
+#include "usart.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +45,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern uint8_t g_ucUsart2ReceiveData;
+extern uint8_t Uart2RxBuff;         // 进入中断接收数据的数组
+extern uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
+extern int RxLine;                  // 接收到的数据长度
+
+extern int RedX, RedY;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,8 +73,8 @@ extern UART_HandleTypeDef huart2;
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
+ * @brief This function handles Non maskable interrupt.
+ */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -81,8 +88,8 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
+ * @brief This function handles Hard fault interrupt.
+ */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -96,8 +103,8 @@ void HardFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Memory management fault.
-  */
+ * @brief This function handles Memory management fault.
+ */
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
@@ -111,8 +118,8 @@ void MemManage_Handler(void)
 }
 
 /**
-  * @brief This function handles Prefetch fault, memory access fault.
-  */
+ * @brief This function handles Prefetch fault, memory access fault.
+ */
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
@@ -126,8 +133,8 @@ void BusFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Undefined instruction or illegal state.
-  */
+ * @brief This function handles Undefined instruction or illegal state.
+ */
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
@@ -141,8 +148,8 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
+ * @brief This function handles System service call via SWI instruction.
+ */
 void SVC_Handler(void)
 {
   /* USER CODE BEGIN SVCall_IRQn 0 */
@@ -154,8 +161,8 @@ void SVC_Handler(void)
 }
 
 /**
-  * @brief This function handles Debug monitor.
-  */
+ * @brief This function handles Debug monitor.
+ */
 void DebugMon_Handler(void)
 {
   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
@@ -167,8 +174,8 @@ void DebugMon_Handler(void)
 }
 
 /**
-  * @brief This function handles Pendable request for system service.
-  */
+ * @brief This function handles Pendable request for system service.
+ */
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
@@ -180,8 +187,8 @@ void PendSV_Handler(void)
 }
 
 /**
-  * @brief This function handles System tick timer.
-  */
+ * @brief This function handles System tick timer.
+ */
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
@@ -201,8 +208,8 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles TIM1 update interrupt.
-  */
+ * @brief This function handles TIM1 update interrupt.
+ */
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
@@ -215,8 +222,8 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART2 global interrupt.
-  */
+ * @brief This function handles USART2 global interrupt.
+ */
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
@@ -231,19 +238,20 @@ void USART2_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart == &huart2) // 判断中断�?
+  if (huart == &huart2) // 判断中断源
   {
-    if (g_ucUsart2ReceiveData == '0')
-      MotorControl(25, 25);
-    if (g_ucUsart2ReceiveData == '1')
-      MotorControl(-25, -25);
-    if (g_ucUsart2ReceiveData == '2')
-      MotorControl(0, 0);
-    if (g_ucUsart2ReceiveData == '3')
-      MotorControl(-20, 20);
-    if (g_ucUsart2ReceiveData == '4')
-      MotorControl(20, -20);
-    HAL_UART_Receive_IT(&huart2, &g_ucUsart2ReceiveData, 1); // 继续进行中断接收
+    RxLine++;                                // 每接收到一个数据，进入回调数据长度加1
+    Uart2DataBuff[RxLine - 1] = Uart2RxBuff; // 把每次接收到的数据保存到缓存数组
+
+    if (Uart2RxBuff == 0x0A) // 接收结束标志位
+    {
+      sscanf((const char *)Uart2DataBuff, "x = %d, y = %d", &RedX, &RedY);
+      memset(Uart2DataBuff, 0, sizeof(Uart2DataBuff)); // 清空缓存数组
+      RxLine = 0;                                      // 清空接收长度
+    }
+
+    Uart2RxBuff = 0;
+    HAL_UART_Receive_IT(&huart2, &Uart2RxBuff, 1); // 每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
   }
 }
 /* USER CODE END 1 */
