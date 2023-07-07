@@ -36,17 +36,19 @@ extern "C"
     float Ur; // 限幅值
 
     int PID_is_Enable; // PID使能
-    float Un;            // 期望输出值
-    float En_1;          // 上一次的误差值
-    float En_2;          // 上上次的误差值
+    float Un;          // 期望输出值
+    float En_1;        // 上一次的误差值
+    float En_2;        // 上上次的误差值
     int PWM;           // 输出PWM值
 
   } PID;
   /* USER CODE END Private defines */
 
   /* USER CODE BEGIN Prototypes */
-  void PID_Init(PID *p);                                         // PID值初始化
+  void Speed_PID_Init(PID *p); // PID值初始化
   void Speed_PID(float targetSpeed, float currentSpeed, PID *p); // 计算PID速度
+  void Trail_PID_Init(PID *p);
+  void Trail_PID(int currentX, PID *p);             // 计算PID循迹速度变化量
   /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

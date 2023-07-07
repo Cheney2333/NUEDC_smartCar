@@ -42,6 +42,7 @@
 /* USER CODE BEGIN PTD */
 PID leftMotor_PID;
 PID rightMotor_PID;
+PID trailMotor_PID;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -75,7 +76,7 @@ uint32_t Threshold = 0;  // CCD阈值
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
 
-float leftTargetSpeed = 0.30, rightTargetSpeed = 0.30;
+float leftTargetSpeed = 0.10, rightTargetSpeed = 0.10;
 
 uint8_t Uart2RxBuff;         // 进入中断接收数据的数组
 uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
@@ -83,12 +84,16 @@ int RxLine = 0;              // 接收到的数据长度
 int Uart2RxFlag = 0;         // 串口2接收标志位
 
 int RedX = 0, RedY = 0;
+int Basic_1_Status = 0, Basic_2_Status = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void Main_Loop(void);
+void OLEDShow(void);
+void Basic_1(void);
+void Basic_2(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -153,8 +158,9 @@ int main(void)
   __HAL_TIM_SET_COUNTER(&htim2, 0);
   __HAL_TIM_SET_COUNTER(&htim3, 0); // initialize encoder timing and set it to 3000
 
-  PID_Init(&leftMotor_PID);
-  PID_Init(&rightMotor_PID);
+  Speed_PID_Init(&leftMotor_PID);
+  Speed_PID_Init(&rightMotor_PID);
+  Trail_PID_Init(&trailMotor_PID);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -217,6 +223,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
@@ -231,10 +238,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     // MotorControl(25, 25);
 
-    // MPU6050_GetData();
-
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
-
     printf("x = %d, y = %d\r\n", RedX, RedY);
 
     if (tim1Count > 20)
@@ -242,6 +246,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       batteryVoltage = adcGetBatteryVoltage();
       // printf("test");
       tim1Count = 0;
+    }
+    if (Basic_1_Status == 0 && Basic_2_Status == 0)
+    {
+      Trail_PID(RedX, &trailMotor_PID);
+      leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+      rightTargetSpeed = 0.10 - trailMotor_PID.Un;
     }
   }
 }
@@ -255,6 +265,12 @@ void MPU6050_GetData() // 获取MPU6050的数值
 
 void Main_Loop()
 {
+  OLEDShow();
+  Basic_1();
+}
+
+void OLEDShow()
+{
   sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
   OLED_ShowString(0, 0, (char *)voltage, 12, 0);
 
@@ -265,6 +281,11 @@ void Main_Loop()
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
   sprintf(colorPostion, "y:%d                ", RedY);
   OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
+}
+
+void Basic_1()
+{
+  MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
 }
 /* USER CODE END 4 */
 
