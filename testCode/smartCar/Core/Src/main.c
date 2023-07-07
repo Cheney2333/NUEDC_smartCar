@@ -76,6 +76,7 @@ uint32_t Threshold = 0;  // CCD阈值
 
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
+int direction = 0; // 前进方向，0为去程，1为返程
 
 float leftTargetSpeed = 0.10, rightTargetSpeed = 0.10;
 
@@ -223,7 +224,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
+  
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
@@ -249,9 +250,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     if (Basic_1_Status == 0 && Basic_2_Status == 0)
     {
-      Trail_PID(RedX, &trailMotor_PID);
-      leftTargetSpeed = 0.10 + trailMotor_PID.Un;
-      rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+      if (direction == 0)
+      {
+        if (RedY > 230)
+        {
+          RedX = RedY;
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        else
+        {
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+      }
     }
   }
 }
@@ -286,9 +300,6 @@ void OLEDShow()
 void Basic_1()
 {
   MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
-  LED_GREEN_2S();
-  LED_RED_1S();
-  Buzzer();
 }
 
 void Basic_2()
