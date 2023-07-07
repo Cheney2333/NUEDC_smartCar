@@ -262,7 +262,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //---------------------基础1去程--------------------------------------------------
       if (direction == 0 && backStatus == 0)
       {
-        if (RedY < 225)
+        if (RedY < 220)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -291,27 +291,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //---------------------基础1返程------------------------------------------------
       else if (direction == 1 && backStatus == 2)
       {
-        if (RedY < 225)
+        if (girdsNum != 9)
         {
-          Trail_PID(RedX, &trailMotor_PID);
-          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
-          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+          if (RedY < 220)
+          {
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+          }
+          else
+          {
+            RedX = 260;
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+          }
         }
-        else
-        {
-          RedX = 260;
-          Trail_PID(RedX, &trailMotor_PID);
-          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
-          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
-        }
-        if (girdsNum == 9) // T型路口直接右转
-        {
-          RedX = 260;
-          Trail_PID(RedX, &trailMotor_PID);
-          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
-          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
-        }
-        else if (girdsNum == 25) // 返程抵达起始点1
+        if (girdsNum == 0) // 返程抵达1#方格
         {
           backStatus = 3;
           direction = 2; // 返程结束
@@ -320,8 +316,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
       //----------------------基础1结束------------------------------------------------
-      else if (direction == 2)
+      else if (direction == 2 && backStatus == 3)
       {
+        // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
     }
   }
@@ -337,7 +334,7 @@ void Basic_1()
 {
   if (direction != 2)
   {
-    if (direction == 1 && backStatus == 1) // 返程
+    if (direction == 1 && backStatus == 1) // 起始返程
     {
       leftTargetSpeed = 0;
       rightTargetSpeed = 0; // 停车
@@ -352,14 +349,27 @@ void Basic_1()
 
       backStatus = 2;
     }
+    if (direction == 1 && backStatus == 2 && girdsNum == 9)
+    {
+      leftTargetSpeed = 0;
+      rightTargetSpeed = 0; // 停车
+      MotorControl(0, 0);
+      // HAL_Delay(200);
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = -0.10; // 原地转右直角弯
+      HAL_Delay(1400);
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = 0.10; // 恢复直线行驶
+      HAL_Delay(2500);
+    }
   }
-  else if (direction == 2 && backStatus == 3) // 停止工作
+  if (direction == 2 && backStatus == 3) // 停止工作
   {
     leftTargetSpeed = 0;
     rightTargetSpeed = 0;
-    HAL_Delay(100);
     LED_GREEN_OFF;
     MotorControl(0, 0);
+    backStatus = 4;
   }
 }
 
