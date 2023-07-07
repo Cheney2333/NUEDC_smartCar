@@ -262,7 +262,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //---------------------基础1去程--------------------------------------------------
       if (direction == 0 && backStatus == 0)
       {
-        if (RedY < 230)
+        if (RedY < 225)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -291,7 +291,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //---------------------基础1返程------------------------------------------------
       else if (direction == 1 && backStatus == 2)
       {
-        if (RedY < 230)
+        if (RedY < 225)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -304,11 +304,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
         }
-        if (girdsNum == 25) // 返程抵达起始点1
+        if (girdsNum == 9) // T型路口直接右转
+        {
+          RedX = 260;
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        else if (girdsNum == 25) // 返程抵达起始点1
         {
           backStatus = 3;
           direction = 2; // 返程结束
-          girdsNum = -1; // 格子计数清零
+          // girdsNum = -1; // 格子计数清零
         }
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
@@ -338,6 +345,7 @@ void Basic_1()
       HAL_Delay(400);
       BUZZER_OFF;      // 蜂鸣示意抵达终点
       HAL_Delay(5000); // 等待5秒
+
       leftTargetSpeed = 0.10;
       rightTargetSpeed = -0.10; // 原地掉头，准备返程
       HAL_Delay(2800);
@@ -386,13 +394,15 @@ void GirdsNumber()
 
   if (TCRT == 0) // 扫描到黑线
   {
-    if (direction == 0 && backStatus == 0)
-      girdsNumStatus++;
-    else if (direction == 1 && backStatus == 2)
-      girdsNumStatus--;
+    girdsNumStatus++;
 
     if (girdsNumStatus == 5)
-      girdsNum++; // 格子数量加一
+    {
+      if (direction == 0 && backStatus == 0)      // 基础1去程
+        girdsNum++;                               // 格子数量加1
+      else if (direction == 1 && backStatus == 2) // 基础1返程
+        girdsNum--;                               // 格子数量减1
+    }
   }
   else if (TCRT == 1) // 未扫描到黑线
     girdsNumStatus = 0;

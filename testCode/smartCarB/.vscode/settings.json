@@ -1,0 +1,15 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "tim.h": "c",
+        "motor.h": "c",
+        "pid.h": "c",
+        "usart.h": "c",
+        "i2c.h": "c",
+        "adc.h": "c",
+        "main.h": "c"
+    }
+}
