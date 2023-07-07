@@ -75,7 +75,7 @@ uint32_t Threshold = 0;  // CCD阈值
 
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
-int direction = 0; // 前进方向，0为去程，1为返程，2为结束
+int direction = 0; // 前进方向，0为去程，1为返程，2为结束；3为基础2去程，4为基础2返程
 
 float leftTargetSpeed = 0.10, rightTargetSpeed = 0.10;
 
@@ -92,6 +92,7 @@ int girdsNumStatus = 0; // 格子数量状态量，用于判断是否持续扫�
 int backStatus = 0;     // 基础1返程标志
 
 int ledGreenCount = 0;
+int ledRedCount = 0;
 int mode[5] = {0};
 /* USER CODE END PV */
 
@@ -229,6 +230,7 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   ledGreenCount++;
+  ledRedCount++;
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
@@ -253,11 +255,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       tim1Count = 0;
     }
     //-----------------------绿灯闪烁2S-------------------------------------------------
-    if (ledGreenCount > 200 && direction != 2) // 2S
+    if (ledGreenCount > 200 && direction < 2) // 2S
     {
       HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin); // 绿灯闪烁
       ledGreenCount = 0;
     }
+    if (ledRedCount > 100 && direction == 4) // 红灯闪烁，间隔1秒
+    {
+      HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+      HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
+      ledRedCount = 0;
+    }
+
     //-----------------------基础1部分---------------------------------------------------
     if (Basic_1_Status == 0 && Basic_2_Status == 0 && mode[0] == 1)
     {
@@ -293,7 +302,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //---------------------基础1返程------------------------------------------------
       else if (direction == 1 && backStatus == 2)
       {
-        if (girdsNum != 9)
+        if (girdsNum != 9 && direction == 1)
         {
           if (RedY < 220)
           {
@@ -309,7 +318,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             rightTargetSpeed = 0.10 - trailMotor_PID.Un;
           }
         }
-        if (girdsNum == 0) // 返程抵达1#方格
+        if (girdsNum == 1 && backStatus == 2) // 返程抵达1#方格
         {
           backStatus = 3;
           direction = 2; // 返程结束
@@ -320,15 +329,65 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       //----------------------基础1结束------------------------------------------------
       else if (direction == 2 && backStatus == 3)
       {
-        // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
     }
     //-------------------------基础2开始------------------------------------------------
     if (mode[1] == 1)
     {
-      leftTargetSpeed = 0.10;
-      rightTargetSpeed = -0.10;
-      MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      //-----------------------基础2去程-----------------------------------------------
+      if (girdsNum < 11 && direction == 0)
+      {
+        if (RedY < 220)
+        {
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        else
+        {
+          RedX = 60;
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        if (girdsNum == 10) // 去程抵达10#方格
+        {
+          backStatus = 5;
+          direction = 4; // 进入返程模式
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      if (direction == 4 && backStatus == 5) // 原地掉头
+      {
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //-----------------------------基础2返程----------------------------------------------
+      if (direction == 4 && backStatus == 6) // 开始紧急返程
+      {
+        if (girdsNum != 9)
+        {
+          trailMotor_PID.Ur = 0.18;
+          if (RedY < 220)
+          {
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.18 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.18 - trailMotor_PID.Un;
+          }
+          else
+          {
+            RedX = 260;
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.18 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.18 - trailMotor_PID.Un;
+          }
+        }
+        if (girdsNum == 1) // 返程抵达1#方格
+        {
+          backStatus = 7; // 基础2紧急返程抵达起始点1
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
     }
   }
 }
@@ -339,6 +398,10 @@ void Main_Loop()
   if (mode[0] == 1)
   {
     Basic_1();
+  }
+  else if (mode[1] == 1)
+  {
+    Basic_2();
   }
 }
 
@@ -375,18 +438,56 @@ void Basic_1()
       HAL_Delay(2500);
     }
   }
-  if (direction == 2 && backStatus == 3) // 停止工作
+  if (direction == 2 && backStatus == 3 && girdsNum == 0) // 停止工作
   {
+    backStatus = 4;
     leftTargetSpeed = 0;
     rightTargetSpeed = 0;
+    HAL_Delay(400);
     LED_GREEN_OFF;
     MotorControl(0, 0);
-    backStatus = 4;
   }
 }
 
 void Basic_2()
 {
+  if (direction == 4 && backStatus == 5)
+  {
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0;
+    HAL_Delay(200);
+    MotorControl(0, 0); // 停车
+
+    leftTargetSpeed = 0.10;
+    rightTargetSpeed = -0.10;
+    HAL_Delay(3000); // 原地掉头，准备返程
+
+    leftSpeed = 0.15;
+    rightSpeed = 0.15;
+    backStatus = 6;
+  }
+  if (direction == 4 && backStatus == 6 && girdsNum == 9) // 紧急返程中T型路口右转弯
+  {
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0; // 停车
+    MotorControl(0, 0);
+    // HAL_Delay(200);
+    leftTargetSpeed = 0.10;
+    rightTargetSpeed = -0.10; // 原地转右直角弯
+    HAL_Delay(1400);
+    leftTargetSpeed = 0.15;
+    rightTargetSpeed = 0.15; // 恢复直线行驶
+    HAL_Delay(1200);
+  }
+  if (direction == 4 && backStatus == 7 && girdsNum == 0)
+  {
+    backStatus = 8;
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0;
+    HAL_Delay(400);
+    LED_GREEN_OFF;
+    MotorControl(0, 0);
+  }
 }
 
 void Buzzer() // 蜂鸣器鸣叫200ms，间隔1秒
@@ -424,6 +525,12 @@ void GirdsNumber()
         girdsNum++;                               // 格子数量加1
       else if (direction == 1 && backStatus == 2) // 基础1返程
         girdsNum--;                               // 格子数量减1
+      else if (direction == 1 && backStatus == 3) // 基础1返程
+        girdsNum--;
+      else if (direction == 0 && mode[1] == 1) // 基础2去程
+        girdsNum++;
+      else if (direction == 4 && mode[1] == 1) // 基础2返程
+        girdsNum--;
     }
   }
   else if (TCRT == 1) // 未扫描到黑线
