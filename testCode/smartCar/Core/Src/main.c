@@ -279,7 +279,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         {
           backStatus = 1;
           direction = 1; // 进入返程模式
-          girdsNum = -1; // 格子计数清零
+          // girdsNum = -1; // 格子计数清零
         }
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
@@ -383,9 +383,14 @@ void LED_RED_1S()
 
 void GirdsNumber()
 {
+
   if (TCRT == 0) // 扫描到黑线
   {
-    girdsNumStatus++;
+    if (direction == 0 && backStatus == 0)
+      girdsNumStatus++;
+    else if (direction == 1 && backStatus == 2)
+      girdsNumStatus--;
+
     if (girdsNumStatus == 5)
       girdsNum++; // 格子数量加一
   }
@@ -401,12 +406,12 @@ void OLEDShow()
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
 
-  sprintf(colorPostion, "x:%d", RedX);
+  sprintf(colorPostion, "x:%d ", RedX);
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
-  sprintf(colorPostion, "y:%d", RedY);
+  sprintf(colorPostion, "y:%d ", RedY);
   OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
 
-  sprintf(colorPostion, "girdNum:%d", girdsNum);
+  sprintf(colorPostion, "girdNum:%d    ", girdsNum);
   OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
 }
 
