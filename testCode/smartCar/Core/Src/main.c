@@ -65,7 +65,6 @@ char speedString[22];
 char CCDString[20];
 char colorPostion[20];
 int tim1Count = 0; // 中断计时
-int girdsCount = 0;
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
@@ -88,7 +87,8 @@ int Uart2RxFlag = 0;         // 串口2接收标志位
 int RedX = 0, RedY = 0;
 int Basic_1_Status = 0, Basic_2_Status = 0;
 
-int girdsNum = 0; // 格子数量
+int girdsNum = -1;      // 格子数量
+int girdsNumStatus = 0; // 格子数量状态量，用于判断是否持续扫描到黑线
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -228,6 +228,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
+    GirdsNumber();
     GetEncoderPulse();
     leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     rightSpeed = CalActualSpeed(encoderPulse[1]);
@@ -240,7 +241,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // MotorControl(25, 25);
 
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
-    printf("x = %d, y = %d\r\n", RedX, RedY);
+    // printf("x = %d, y = %d\r\n", RedX, RedY);
 
     if (tim1Count > 20)
     {
@@ -252,7 +253,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       if (direction == 0) // 基础1去程
       {
-        if (RedY < 220)
+        if (RedY < 235)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -260,7 +261,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         else
         {
-          RedX = 40;
+          RedX = 60;
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
@@ -295,11 +296,15 @@ void OLEDShow()
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
   sprintf(colorPostion, "y:%d", RedY);
   OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
+
+  sprintf(colorPostion, "girdNum:%d", girdsNum);
+  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
 }
 
 void Basic_1()
 {
   MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+  // LED_GREEN_2S();
 }
 
 void Basic_2()
@@ -308,35 +313,36 @@ void Basic_2()
 
 void Buzzer() // 蜂鸣器鸣叫200ms
 {
-  HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 1);
+  BUZZER_ON;
   HAL_Delay(200);
-  HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 0);
+  BUZZER_OFF;
   HAL_Delay(1000);
 }
 
 void LED_GREEN_2S()
 {
-  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1);
+  LED_GREEN_ON;
   HAL_Delay(2000);
-  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 0);
+  LED_GREEN_OFF;
+  HAL_Delay(2000);
 }
 void LED_RED_1S()
 {
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 1);
+  LED_RED_ON;
   HAL_Delay(1000);
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 0);
+  LED_RED_OFF;
 }
 
-void GridsNumber()
+void GirdsNumber()
 {
-  if (HAL_GPIO_ReadPin(TCRT_D0_GPIO_Port, TCRT_D0_Pin) == 0) // 扫描到黑线
+  if (TCRT == 0) // 扫描到黑线
   {
-    girdsNum++;
-    if (girdsNum > 25)
-    {
-      girdsNum = 25;
-    }
+    girdsNumStatus++;
+    if (girdsNumStatus == 5)
+      girdsNum++; // 格子数量加一
   }
+  else if (TCRT == 1) // 未扫描到黑线
+    girdsNumStatus = 0;
 }
 /* USER CODE END 4 */
 

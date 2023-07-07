@@ -18,10 +18,10 @@ void Speed_PID_Init(PID *p)
 }
 void Trail_PID_Init(PID *p)
 {
-	p->Kp = 0.3;
-	p->Ki = 0.01;
+	p->Kp = 0.31;
+	p->Ki = 0.012;
 	p->Kd = 0.0;
-	p->Ur = 0.10;
+	p->Ur = 0.06;
 	p->PID_is_Enable = 1;
 	p->Un = 0;
 	p->En_1 = 0;

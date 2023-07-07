@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.h
+ * @brief          : Header for main.c file.
+ *                   This file contains the common defines of the application.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -53,15 +53,15 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void MPU6050_GetData(void);
-void Main_Loop(void);
-void OLEDShow(void);
-void Basic_1(void);
-void Basic_2(void);
-void Buzzer(void);
-void LED_GREEN_2S(void);
-void LED_RED_1S(void);
-void GridsNumber(void);
+  void MPU6050_GetData(void);
+  void Main_Loop(void);
+  void OLEDShow(void);
+  void Basic_1(void);
+  void Basic_2(void);
+  void Buzzer(void);
+  void LED_GREEN_2S(void);
+  void LED_RED_1S(void);
+  void GirdsNumber(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -109,7 +109,13 @@ void GridsNumber(void);
 #define MPU6050_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define LED_RED_ON HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 1)
+#define LED_RED_OFF HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 0);
+#define LED_GREEN_ON HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1)
+#define LED_GREEN_OFF HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 0)
+#define BUZZER_ON HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 1)
+#define BUZZER_OFF HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 0)
+#define TCRT HAL_GPIO_ReadPin(TCRT_D0_GPIO_Port, TCRT_D0_Pin) // 红外传感器电平值
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
