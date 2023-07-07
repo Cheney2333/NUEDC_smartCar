@@ -59,6 +59,9 @@ void OLEDShow(void);
 void Basic_1(void);
 void Basic_2(void);
 void Buzzer(void);
+void LED_GREEN_2S(void);
+void LED_RED_1S(void);
+void GridsNumber(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

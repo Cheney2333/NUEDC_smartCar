@@ -64,7 +64,8 @@ char mpuString[10];
 char speedString[22];
 char CCDString[20];
 char colorPostion[20];
-int tim1Count = 0;
+int tim1Count = 0; // 中断计时
+int girdsCount = 0;
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
@@ -85,6 +86,8 @@ int Uart2RxFlag = 0;         // 串口2接收标志位
 
 int RedX = 0, RedY = 0;
 int Basic_1_Status = 0, Basic_2_Status = 0;
+
+int girdsNum = 0; // 格子数量
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -274,15 +277,18 @@ void OLEDShow()
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
 
-  sprintf(colorPostion, "x:%d                ", RedX);
+  sprintf(colorPostion, "x:%d", RedX);
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
-  sprintf(colorPostion, "y:%d                ", RedY);
-  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
+  sprintf(colorPostion, "y:%d", RedY);
+  OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
 }
 
 void Basic_1()
 {
   MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+  LED_GREEN_2S();
+  LED_RED_1S();
+  Buzzer();
 }
 
 void Basic_2()
@@ -294,6 +300,32 @@ void Buzzer() // 蜂鸣器鸣叫200ms
   HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 1);
   HAL_Delay(200);
   HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 0);
+  HAL_Delay(1000);
+}
+
+void LED_GREEN_2S()
+{
+  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1);
+  HAL_Delay(2000);
+  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 0);
+}
+void LED_RED_1S()
+{
+  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 1);
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 0);
+}
+
+void GridsNumber()
+{
+  if (HAL_GPIO_ReadPin(TCRT_D0_GPIO_Port, TCRT_D0_Pin) == 0) // 扫描到黑线
+  {
+    girdsNum++;
+    if (girdsNum > 25)
+    {
+      girdsNum = 25;
+    }
+  }
 }
 /* USER CODE END 4 */
 
