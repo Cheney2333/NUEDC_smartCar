@@ -236,17 +236,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
     Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
 
-    // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
-
     // MotorControl(25, 25);
 
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
     // printf("x = %d, y = %d\r\n", RedX, RedY);
 
-    if (tim1Count > 20)
+    if (tim1Count > 100) // 1S
     {
       batteryVoltage = adcGetBatteryVoltage();
-      // printf("test");
       tim1Count = 0;
     }
     if (Basic_1_Status == 0 && Basic_2_Status == 0)
@@ -262,6 +259,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         else
         {
           RedX = 60;
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+      }
+      else if (direction == 1) // 基础1返程
+      {
+        if (RedY < 235)
+        {
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        else
+        {
+          RedX = 160;
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
@@ -303,6 +316,7 @@ void OLEDShow()
 
 void Basic_1()
 {
+  OLEDShow();
   MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
   // LED_GREEN_2S();
 }
