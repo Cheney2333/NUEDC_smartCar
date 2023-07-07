@@ -75,7 +75,7 @@ uint32_t Threshold = 0;  // CCD阈值
 
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float leftSpeed = 0, rightSpeed = 0;
-int direction = 0; // 前进方向，0为去程，1为返程
+int direction = 0; // 前进方向，0为去程，1为返程，2为结束
 
 float leftTargetSpeed = 0.10, rightTargetSpeed = 0.10;
 
@@ -89,6 +89,9 @@ int Basic_1_Status = 0, Basic_2_Status = 0;
 
 int girdsNum = -1;      // 格子数量
 int girdsNumStatus = 0; // 格子数量状态量，用于判断是否持续扫描到黑线
+int backStatus = 0;     // 基础1返程标志
+
+int ledGreenCount = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -224,7 +227,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
+  ledGreenCount++;
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
@@ -241,16 +244,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
     // printf("x = %d, y = %d\r\n", RedX, RedY);
 
+    //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100) // 1S
     {
       batteryVoltage = adcGetBatteryVoltage();
       tim1Count = 0;
     }
+    //-----------------------绿灯闪烁2S-------------------------------------------------
+    if (ledGreenCount > 200 && direction != 2) // 2S
+    {
+      HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin); // 绿灯闪烁
+      ledGreenCount = 0;
+    }
+    //-----------------------基础1部分---------------------------------------------------
     if (Basic_1_Status == 0 && Basic_2_Status == 0)
     {
-      if (direction == 0) // 基础1去程
+      //---------------------基础1去程--------------------------------------------------
+      if (direction == 0 && backStatus == 0)
       {
-        if (RedY < 235)
+        if (RedY < 230)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -263,10 +275,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
         }
+        if (girdsNum == 25) // 去程抵达终点
+        {
+          backStatus = 1;
+          direction = 1; // 进入返程模式
+          girdsNum = -1; // 格子计数清零
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
-      else if (direction == 1) // 基础1返程
+      //---------------------基础1抵达终点后至返程前-----------------------------------
+      else if (direction == 1 && backStatus == 1)
       {
-        if (RedY < 235)
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //---------------------基础1返程------------------------------------------------
+      else if (direction == 1 && backStatus == 2)
+      {
+        if (RedY < 230)
         {
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
@@ -274,21 +299,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         else
         {
-          RedX = 160;
+          RedX = 260;
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
         }
+        if (girdsNum == 25) // 返程抵达起始点1
+        {
+          backStatus = 3;
+          direction = 2; // 返程结束
+          girdsNum = -1; // 格子计数清零
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //----------------------基础1结束------------------------------------------------
+      else if (direction == 2)
+      {
       }
     }
   }
-}
-void MPU6050_GetData() // 获取MPU6050的数值
-{
-  while (mpu_dmp_get_data(&pitch, &roll, &yaw))
-    ;                                                  // 必须要用while等待，才能读取成功
-  MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz);           // 得到陀螺仪数据
-  printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
 }
 
 void Main_Loop()
@@ -297,35 +326,40 @@ void Main_Loop()
   Basic_1();
 }
 
-void OLEDShow()
-{
-  sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
-  OLED_ShowString(0, 0, (char *)voltage, 12, 0);
-
-  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
-  OLED_ShowString(0, 2, (char *)speedString, 12, 0);
-
-  sprintf(colorPostion, "x:%d", RedX);
-  OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
-  sprintf(colorPostion, "y:%d", RedY);
-  OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
-
-  sprintf(colorPostion, "girdNum:%d", girdsNum);
-  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
-}
-
 void Basic_1()
 {
-  OLEDShow();
-  MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
-  // LED_GREEN_2S();
+  if (direction != 2)
+  {
+    if (direction == 1 && backStatus == 1) // 返程
+    {
+      leftTargetSpeed = 0;
+      rightTargetSpeed = 0; // 停车
+      BUZZER_ON;
+      HAL_Delay(400);
+      BUZZER_OFF;      // 蜂鸣示意抵达终点
+      HAL_Delay(5000); // 等待5秒
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = -0.10; // 原地掉头，准备返程
+      HAL_Delay(2800);
+
+      backStatus = 2;
+    }
+  }
+  else if (direction == 2 && backStatus == 3) // 停止工作
+  {
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0;
+    HAL_Delay(100);
+    LED_GREEN_OFF;
+    MotorControl(0, 0);
+  }
 }
 
 void Basic_2()
 {
 }
 
-void Buzzer() // 蜂鸣器鸣叫200ms
+void Buzzer() // 蜂鸣器鸣叫200ms，间隔1秒
 {
   BUZZER_ON;
   HAL_Delay(200);
@@ -357,6 +391,31 @@ void GirdsNumber()
   }
   else if (TCRT == 1) // 未扫描到黑线
     girdsNumStatus = 0;
+}
+
+void OLEDShow()
+{
+  sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
+  OLED_ShowString(0, 0, (char *)voltage, 12, 0);
+
+  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
+  OLED_ShowString(0, 2, (char *)speedString, 12, 0);
+
+  sprintf(colorPostion, "x:%d", RedX);
+  OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
+  sprintf(colorPostion, "y:%d", RedY);
+  OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
+
+  sprintf(colorPostion, "girdNum:%d", girdsNum);
+  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
+}
+
+void MPU6050_GetData() // 获取MPU6050的数值
+{
+  while (mpu_dmp_get_data(&pitch, &roll, &yaw))
+    ;                                                  // 必须要用while等待，才能读取成功
+  MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz);           // 得到陀螺仪数据
+  printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
 }
 /* USER CODE END 4 */
 
