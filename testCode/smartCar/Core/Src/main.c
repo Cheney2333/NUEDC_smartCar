@@ -92,6 +92,7 @@ int girdsNumStatus = 0; // 格子数量状态量，用于判断是否持续扫�
 int backStatus = 0;     // 基础1返程标志
 
 int ledGreenCount = 0;
+int mode[5] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -231,6 +232,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
+    GetKeyStatus();
     GirdsNumber();
     GetEncoderPulse();
     leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
@@ -257,7 +259,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       ledGreenCount = 0;
     }
     //-----------------------基础1部分---------------------------------------------------
-    if (Basic_1_Status == 0 && Basic_2_Status == 0)
+    if (Basic_1_Status == 0 && Basic_2_Status == 0 && mode[0] == 1)
     {
       //---------------------基础1去程--------------------------------------------------
       if (direction == 0 && backStatus == 0)
@@ -321,13 +323,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         // MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
     }
+    //-------------------------基础2开始------------------------------------------------
+    if (mode[1] == 1)
+    {
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = -0.10;
+      MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+    }
   }
 }
 
 void Main_Loop()
 {
   OLEDShow();
-  Basic_1();
+  if (mode[0] == 1)
+  {
+    Basic_1();
+  }
 }
 
 void Basic_1()
@@ -441,6 +453,38 @@ void MPU6050_GetData() // 获取MPU6050的数值
     ;                                                  // 必须要用while等待，才能读取成功
   MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz);           // 得到陀螺仪数据
   printf("data:%.1f,%.1f,%.1f\r\n", roll, pitch, yaw); // 串口1输出采集信息
+}
+
+void GetKeyStatus()
+{
+  if (KEY1 == 0)
+  {
+    mode[0] = 1;
+    mode[1] = 0;
+    mode[2] = 0;
+    mode[3] = 0;
+  }
+  else if (KEY2 == 0)
+  {
+    mode[0] = 0;
+    mode[1] = 1;
+    mode[2] = 0;
+    mode[3] = 0;
+  }
+  else if (KEY3 == 0)
+  {
+    mode[0] = 0;
+    mode[1] = 0;
+    mode[2] = 1;
+    mode[3] = 0;
+  }
+  else if (KEY4 == 0)
+  {
+    mode[0] = 0;
+    mode[1] = 0;
+    mode[2] = 0;
+    mode[3] = 1;
+  }
 }
 /* USER CODE END 4 */
 

@@ -62,6 +62,7 @@ void Error_Handler(void);
   void LED_GREEN_2S(void);
   void LED_RED_1S(void);
   void GirdsNumber(void);
+  void GetKeyStatus(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -79,6 +80,14 @@ void Error_Handler(void);
 #define BMotorEncoderA_GPIO_Port GPIOA
 #define BMotorEncoderB_Pin GPIO_PIN_7
 #define BMotorEncoderB_GPIO_Port GPIOA
+#define KEY1_Pin GPIO_PIN_8
+#define KEY1_GPIO_Port GPIOE
+#define KEY2_Pin GPIO_PIN_9
+#define KEY2_GPIO_Port GPIOE
+#define KEY3_Pin GPIO_PIN_10
+#define KEY3_GPIO_Port GPIOE
+#define KEY4_Pin GPIO_PIN_11
+#define KEY4_GPIO_Port GPIOE
 #define TCRT_D0_Pin GPIO_PIN_12
 #define TCRT_D0_GPIO_Port GPIOE
 #define Buzzer_IO_Pin GPIO_PIN_13
@@ -116,6 +125,10 @@ void Error_Handler(void);
 #define BUZZER_ON HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 1)
 #define BUZZER_OFF HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 0)
 #define TCRT HAL_GPIO_ReadPin(TCRT_D0_GPIO_Port, TCRT_D0_Pin) // 红外传感器电平值
+#define KEY1 HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin)
+#define KEY2 HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin)
+#define KEY3 HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin)
+#define KEY4 HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
