@@ -224,7 +224,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  
+
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
@@ -250,17 +250,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     if (Basic_1_Status == 0 && Basic_2_Status == 0)
     {
-      if (direction == 0)
+      if (direction == 0) // 基础1去程
       {
-        if (RedY > 230)
+        if (RedY < 220)
         {
-          RedX = RedY;
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
         }
         else
         {
+          RedX = 40;
           Trail_PID(RedX, &trailMotor_PID);
           leftTargetSpeed = 0.10 + trailMotor_PID.Un;
           rightTargetSpeed = 0.10 - trailMotor_PID.Un;
