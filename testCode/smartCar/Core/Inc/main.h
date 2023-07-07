@@ -54,6 +54,11 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void MPU6050_GetData(void);
+void Main_Loop(void);
+void OLEDShow(void);
+void Basic_1(void);
+void Basic_2(void);
+void Buzzer(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -71,6 +76,14 @@ void MPU6050_GetData(void);
 #define BMotorEncoderA_GPIO_Port GPIOA
 #define BMotorEncoderB_Pin GPIO_PIN_7
 #define BMotorEncoderB_GPIO_Port GPIOA
+#define TCRT_D0_Pin GPIO_PIN_12
+#define TCRT_D0_GPIO_Port GPIOE
+#define Buzzer_IO_Pin GPIO_PIN_13
+#define Buzzer_IO_GPIO_Port GPIOE
+#define LED_RED_Pin GPIO_PIN_14
+#define LED_RED_GPIO_Port GPIOE
+#define LED_GREEN_Pin GPIO_PIN_15
+#define LED_GREEN_GPIO_Port GPIOE
 #define PWMA_Pin GPIO_PIN_14
 #define PWMA_GPIO_Port GPIOD
 #define PWMB_Pin GPIO_PIN_15

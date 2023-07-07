@@ -6,6 +6,10 @@
         "*.wxs": "javascript",
         "tim.h": "c",
         "motor.h": "c",
-        "pid.h": "c"
+        "pid.h": "c",
+        "usart.h": "c",
+        "i2c.h": "c",
+        "adc.h": "c",
+        "main.h": "c"
     }
 }

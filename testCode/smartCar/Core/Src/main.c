@@ -90,10 +90,7 @@ int Basic_1_Status = 0, Basic_2_Status = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void Main_Loop(void);
-void OLEDShow(void);
-void Basic_1(void);
-void Basic_2(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -286,6 +283,17 @@ void OLEDShow()
 void Basic_1()
 {
   MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+}
+
+void Basic_2()
+{
+}
+
+void Buzzer() // 蜂鸣器鸣叫200ms
+{
+  HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 1);
+  HAL_Delay(200);
+  HAL_GPIO_WritePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin, 0);
 }
 /* USER CODE END 4 */
 
