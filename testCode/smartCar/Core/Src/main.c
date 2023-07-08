@@ -63,7 +63,7 @@ char voltage[20];
 char mpuString[10];
 char speedString[22];
 char CCDString[20];
-char colorPostion[20];
+char colorPostion[30];
 int tim1Count = 0; // 中断计时
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
@@ -99,6 +99,8 @@ int ledRedCount = 0;
 int mode[5] = {0};
 
 int Triangle[26] = {0}, Square[26] = {0}, Circle[26] = {0};
+
+int trianglePosition[2] = {0}, squarePosition[2] = {0}, circlePosition[2] = {0}; // 三个形状的位置,初始均为0
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -609,6 +611,13 @@ void Expand_1()
     LED_GREEN_OFF;
     MotorControl(0, 0);
   }
+  if (backStatus == 4)
+  {
+    findTwoLargestIndex(Triangle, &trianglePosition[0], &trianglePosition[1]);
+    findTwoLargestIndex(Square, &squarePosition[0], &squarePosition[1]);
+    findTwoLargestIndex(Circle, &circlePosition[0], &circlePosition[1]);
+    backStatus = 5;
+  }
 }
 
 void Expand_2()
@@ -668,15 +677,22 @@ void OLEDShow()
   OLED_ShowString(0, 0, (char *)voltage, 12, 0);
 
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
-  OLED_ShowString(0, 2, (char *)speedString, 12, 0);
+  OLED_ShowString(0, 1, (char *)speedString, 12, 0);
 
-  sprintf(colorPostion, "x:%d ", RedX);
+  sprintf(colorPostion, "x:%d y:%d girdNum:%d    ", RedX, RedY, girdsNum);
+  OLED_ShowString(0, 2, (char *)colorPostion, 12, 0);
+  // sprintf(colorPostion, "y:%d ", RedY);
+  // OLED_ShowString(60, 1, (char *)colorPostion, 12, 0);
+
+  // sprintf(colorPostion, "girdNum:%d    ", girdsNum);
+  // OLED_ShowString(0, 2, (char *)colorPostion, 12, 0);
+
+  sprintf(colorPostion, "triangle: %d, %d        ", trianglePosition[0], trianglePosition[1]);
+  OLED_ShowString(0, 3, (char *)colorPostion, 12, 0);
+  sprintf(colorPostion, "square: %d, %d        ", squarePosition[0], squarePosition[1]);
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
-  sprintf(colorPostion, "y:%d ", RedY);
-  OLED_ShowString(60, 4, (char *)colorPostion, 12, 0);
-
-  sprintf(colorPostion, "girdNum:%d    ", girdsNum);
-  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
+  sprintf(colorPostion, "circle: %d, %d        ", circlePosition[0], circlePosition[1]);
+  OLED_ShowString(0, 5, (char *)colorPostion, 12, 0);
 }
 
 void MPU6050_GetData() // 获取MPU6050的数值
