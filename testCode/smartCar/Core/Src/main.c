@@ -263,7 +263,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (ledRedCount > 100 && direction == 4) // 红灯闪烁，间隔1秒
     {
       HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-      HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
+      // HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
       ledRedCount = 0;
     }
 
@@ -367,19 +367,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       {
         if (girdsNum != 9)
         {
-          trailMotor_PID.Ur = 0.18;
+          trailMotor_PID.Ur = 0.15;
           if (RedY < 220)
           {
             Trail_PID(RedX, &trailMotor_PID);
-            leftTargetSpeed = 0.18 + trailMotor_PID.Un;
-            rightTargetSpeed = 0.18 - trailMotor_PID.Un;
+            leftTargetSpeed = 0.15 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.15 - trailMotor_PID.Un;
           }
           else
           {
             RedX = 260;
             Trail_PID(RedX, &trailMotor_PID);
-            leftTargetSpeed = 0.18 + trailMotor_PID.Un;
-            rightTargetSpeed = 0.18 - trailMotor_PID.Un;
+            leftTargetSpeed = 0.15 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.15 - trailMotor_PID.Un;
           }
         }
         if (girdsNum == 1) // 返程抵达1#方格
@@ -460,11 +460,12 @@ void Basic_2()
 
     leftTargetSpeed = 0.10;
     rightTargetSpeed = -0.10;
-    HAL_Delay(3000); // 原地掉头，准备返程
+    HAL_Delay(2900); // 原地掉头，准备返程
 
-    leftSpeed = 0.15;
-    rightSpeed = 0.15;
+    leftSpeed = 0.10;
+    rightSpeed = 0.10;
     backStatus = 6;
+    HAL_Delay(3000);
   }
   if (direction == 4 && backStatus == 6 && girdsNum == 9) // 紧急返程中T型路口右转弯
   {
@@ -477,7 +478,7 @@ void Basic_2()
     HAL_Delay(1400);
     leftTargetSpeed = 0.15;
     rightTargetSpeed = 0.15; // 恢复直线行驶
-    HAL_Delay(1200);
+    HAL_Delay(2000);
   }
   if (direction == 4 && backStatus == 7 && girdsNum == 0)
   {
@@ -525,7 +526,7 @@ void GirdsNumber()
         girdsNum++;                               // 格子数量加1
       else if (direction == 1 && backStatus == 2) // 基础1返程
         girdsNum--;                               // 格子数量减1
-      else if (direction == 1 && backStatus == 3) // 基础1返程
+      else if (direction == 2 && backStatus == 3) // 基础1返程
         girdsNum--;
       else if (direction == 0 && mode[1] == 1) // 基础2去程
         girdsNum++;
