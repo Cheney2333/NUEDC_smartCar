@@ -157,7 +157,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_2);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // start encoder timer
-  HAL_ADCEx_Calibration_Start(&CCD_AO_hadc);
+  // HAL_ADCEx_Calibration_Start(&CCD_AO_hadc);
   __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE); // start encoder timer to update interrupts and prevent overflow processing
 
