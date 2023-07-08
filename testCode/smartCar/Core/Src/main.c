@@ -460,7 +460,7 @@ void Basic_2()
 
     leftTargetSpeed = 0.10;
     rightTargetSpeed = -0.10;
-    HAL_Delay(2900); // 原地掉头，准备返程
+    HAL_Delay(2800); // 原地掉头，准备返程
 
     leftSpeed = 0.10;
     rightSpeed = 0.10;
@@ -471,8 +471,8 @@ void Basic_2()
   {
     leftTargetSpeed = 0;
     rightTargetSpeed = 0; // 停车
+    HAL_Delay(200);
     MotorControl(0, 0);
-    // HAL_Delay(200);
     leftTargetSpeed = 0.10;
     rightTargetSpeed = -0.10; // 原地转右直角弯
     HAL_Delay(1400);
