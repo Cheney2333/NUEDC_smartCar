@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
  ******************************************************************************
- * @file    motor.h
+ * @file    pid.h
  * @brief   This file contains all the function prototypes for
  *          the pid.c file
  ******************************************************************************

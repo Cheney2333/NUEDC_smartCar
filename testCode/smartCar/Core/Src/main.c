@@ -84,6 +84,9 @@ uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
 int RxLine = 0;              // 接收到的数据长度
 int Uart2RxFlag = 0;         // 串口2接收标志位
 
+uint8_t Uart3RxBuff; // 进入中断接收数据的数组
+int Uart3RxFlag = 0; // 串口3接收标志位
+
 int RedX = 0, RedY = 0;
 int Basic_1_Status = 0, Basic_2_Status = 0;
 
@@ -94,6 +97,8 @@ int backStatus = 0;     // 基础1返程标志
 int ledGreenCount = 0;
 int ledRedCount = 0;
 int mode[5] = {0};
+
+int Triangle[26] = {0}, Square[26] = {0}, Circle[26] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -142,6 +147,7 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_TIM2_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_Clear();
@@ -376,7 +382,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
           }
           else
           {
-            RedX = 260;
+            RedX = 250;
             Trail_PID(RedX, &trailMotor_PID);
             leftTargetSpeed = 0.15 + trailMotor_PID.Un;
             rightTargetSpeed = 0.15 - trailMotor_PID.Un;
@@ -389,6 +395,71 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
     }
+    //-------------------------------------发挥1部分-----------------------------------
+    if (mode[2] == 1)
+    {
+      //---------------------发挥1去程--------------------------------------------------
+      if (direction == 0 && backStatus == 0)
+      {
+        if (RedY < 220)
+        {
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        else
+        {
+          RedX = 60;
+          Trail_PID(RedX, &trailMotor_PID);
+          leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+          rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+        }
+        if (girdsNum == 25) // 去程抵达终点
+        {
+          backStatus = 1;
+          direction = 1; // 进入返程模式
+          // girdsNum = -1; // 格子计数清零
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //---------------------发挥1抵达终点后至返程前-----------------------------------
+      else if (direction == 1 && backStatus == 1)
+      {
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //---------------------发挥1返程------------------------------------------------
+      else if (direction == 1 && backStatus == 2)
+      {
+        if (girdsNum != 9 && direction == 1)
+        {
+          if (RedY < 220)
+          {
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+          }
+          else
+          {
+            RedX = 260;
+            Trail_PID(RedX, &trailMotor_PID);
+            leftTargetSpeed = 0.10 + trailMotor_PID.Un;
+            rightTargetSpeed = 0.10 - trailMotor_PID.Un;
+          }
+        }
+        if (girdsNum == 1 && backStatus == 2) // 返程抵达1#方格
+        {
+          backStatus = 3;
+          direction = 2; // 返程结束
+          // girdsNum = -1; // 格子计数清零
+        }
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+      //----------------------发挥1结束------------------------------------------------
+      else if (direction == 2 && backStatus == 3)
+      {
+        MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+      }
+    }
   }
 }
 
@@ -396,13 +467,13 @@ void Main_Loop()
 {
   OLEDShow();
   if (mode[0] == 1)
-  {
     Basic_1();
-  }
   else if (mode[1] == 1)
-  {
     Basic_2();
-  }
+  else if (mode[2] == 1)
+    Expand_1();
+  else if (mode[3] == 1)
+    Expand_2();
 }
 
 void Basic_1()
@@ -478,17 +549,70 @@ void Basic_2()
     HAL_Delay(1400);
     leftTargetSpeed = 0.15;
     rightTargetSpeed = 0.15; // 恢复直线行驶
-    HAL_Delay(2000);
+    HAL_Delay(3000);
   }
   if (direction == 4 && backStatus == 7 && girdsNum == 0)
   {
     backStatus = 8;
     leftTargetSpeed = 0;
     rightTargetSpeed = 0;
+    HAL_Delay(100);
+    MotorControl(0, 0);
+    LED_GREEN_OFF;
+  }
+}
+
+void Expand_1()
+{
+  if (Uart3RxFlag == 0)
+  {
+    HAL_UART_Receive_IT(&huart3, &Uart3RxBuff, 1); // 打开串口3接收中断
+    Uart3RxFlag = 1;
+  }
+  if (direction != 2)
+  {
+    if (direction == 1 && backStatus == 1) // 起始返程
+    {
+      leftTargetSpeed = 0;
+      rightTargetSpeed = 0; // 停车
+      BUZZER_ON;
+      HAL_Delay(400);
+      BUZZER_OFF;      // 蜂鸣示意抵达终点
+      HAL_Delay(5000); // 等待5秒
+
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = -0.10; // 原地掉头，准备返程
+      HAL_Delay(2800);
+
+      backStatus = 2;
+    }
+    if (direction == 1 && backStatus == 2 && girdsNum == 9)
+    {
+      leftTargetSpeed = 0;
+      rightTargetSpeed = 0; // 停车
+      MotorControl(0, 0);
+      // HAL_Delay(200);
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = -0.10; // 原地转右直角弯
+      HAL_Delay(1400);
+      leftTargetSpeed = 0.10;
+      rightTargetSpeed = 0.10; // 恢复直线行驶
+      HAL_Delay(2500);
+    }
+  }
+  if (direction == 2 && backStatus == 3 && girdsNum == 0) // 停止工作
+  {
+    backStatus = 4;
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0;
     HAL_Delay(400);
     LED_GREEN_OFF;
     MotorControl(0, 0);
   }
+}
+
+void Expand_2()
+{
 }
 
 void Buzzer() // 蜂鸣器鸣叫200ms，间隔1秒
@@ -540,7 +664,7 @@ void GirdsNumber()
 
 void OLEDShow()
 {
-  sprintf(voltage, "batteryVoltage:%.1fV", batteryVoltage);
+  sprintf(voltage, "voltage:%.1fV", batteryVoltage);
   OLED_ShowString(0, 0, (char *)voltage, 12, 0);
 
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
@@ -594,6 +718,28 @@ void GetKeyStatus()
     mode[3] = 1;
   }
 }
+
+void findTwoLargestIndex(int a[], int *firstIndex, int *secondIndex)
+{
+  int size = 26;
+  *firstIndex = *secondIndex = 0; // 将初始索引设为0
+  int largest = 0;
+
+  for (int i = 1; i < size; i++)
+  {
+    if (a[i] > a[*firstIndex])
+    {
+      *secondIndex = *firstIndex;
+      *firstIndex = i;
+      largest = i;
+    }
+    else if (*secondIndex == *firstIndex || a[i] > a[*secondIndex])
+    {
+      *secondIndex = i;
+    }
+  }
+}
+
 /* USER CODE END 4 */
 
 /**
