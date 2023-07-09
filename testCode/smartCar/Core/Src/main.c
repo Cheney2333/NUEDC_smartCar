@@ -119,9 +119,9 @@ void SystemClock_Config(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -205,9 +205,9 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -215,8 +215,8 @@ void SystemClock_Config(void)
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
@@ -230,9 +230,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -274,12 +273,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
     // printf("x = %d, y = %d\r\n", RedX, RedY);
 
-    //-------------------------测距----------------------------------------------------
-    if (tim1Count == 3) // 30ms
-    {
-      distance = readRangeSingleMillimeters(&distanceStr);
-    }
-
     //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100) // 1S
     {
@@ -292,7 +285,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin); // 绿灯闪烁
       ledGreenCount = 0;
     }
-    if (ledRedCount > 100 && direction == 4) // 红灯闪烁，间隔1秒
+    if (ledRedCount > 100 && direction == 4) // 紧急返程过程中，红灯闪烁、蜂鸣器鸣叫，间隔1秒
     {
       HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
       HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
@@ -492,7 +485,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Main_Loop()
 {
   OLEDShow();
-
+  distance = readRangeSingleMillimeters(&distanceStr);
   if (mode[0] == 1)
     Basic_1();
   else if (mode[1] == 1)
@@ -558,12 +551,17 @@ void Basic_2()
 
     leftTargetSpeed = 0.10;
     rightTargetSpeed = -0.10;
-    HAL_Delay(2800); // 原地掉头，准备返程
+    HAL_Delay(2900); // 原地掉头，准备返程
 
     leftSpeed = 0.10;
     rightSpeed = 0.10;
     backStatus = 6;
-    HAL_Delay(3000);
+    HAL_Delay(2100); // 走到9#方格
+
+    leftTargetSpeed = 0;
+    rightTargetSpeed = 0; // 停车
+    HAL_Delay(200);
+    MotorControl(0, 0);
   }
   if (direction == 4 && backStatus == 6 && girdsNum == 9) // 紧急返程中T型路口右转弯
   {
@@ -571,12 +569,13 @@ void Basic_2()
     rightTargetSpeed = 0; // 停车
     HAL_Delay(200);
     MotorControl(0, 0);
+
     leftTargetSpeed = 0.10;
     rightTargetSpeed = -0.10; // 原地转右直角弯
     HAL_Delay(1400);
     leftTargetSpeed = 0.15;
     rightTargetSpeed = 0.15; // 恢复直线行驶
-    HAL_Delay(3000);
+    HAL_Delay(2000);
   }
   if (direction == 4 && backStatus == 7 && girdsNum == 0)
   {
@@ -587,6 +586,7 @@ void Basic_2()
     MotorControl(0, 0);
     LED_GREEN_OFF;
     LED_RED_OFF;
+    direction = 5;
   }
 }
 
@@ -788,9 +788,9 @@ void findTwoLargestIndex(int a[], int *firstIndex, int *secondIndex)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -802,14 +802,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
