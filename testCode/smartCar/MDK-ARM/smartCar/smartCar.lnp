@@ -35,6 +35,7 @@
 "smartcar\inv_mpu_dmp_motion_driver.o"
 "smartcar\mpu6050.o"
 "smartcar\ccd_tsl1401.o"
+"smartcar\vl53l0x.o"
 --library_type=microlib --strict --scatter "smartCar\smartCar.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

@@ -36,6 +36,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "CCD_TSL1401.h"
+#include "VL53L0X.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,6 +102,9 @@ int mode[5] = {0};
 int Triangle[26] = {0}, Square[26] = {0}, Circle[26] = {0};
 
 int trianglePosition[2] = {0}, squarePosition[2] = {0}, circlePosition[2] = {0}; // 三个形状的位置,初始均为0
+
+uint16_t distance = 0; // unit: mm
+statInfo_t_VL53L0X distanceStr;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,9 +119,9 @@ void SystemClock_Config(void);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -150,9 +154,19 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_USART3_UART_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_Clear();
+
+  // Initialise the VL53L0X
+  initVL53L0X(1, &hi2c2);
+
+  // Configure the sensor for high accuracy and speed in 20 cm.
+  setSignalRateLimit(200);
+  setVcselPulsePeriod(VcselPeriodPreRange, 10);
+  setVcselPulsePeriod(VcselPeriodFinalRange, 14);
+  setMeasurementTimingBudget(300 * 1000UL);
 
   // MPU_Init();     // MPU6050初始化
   // mpu_dmp_init(); // dmp初始化
@@ -175,6 +189,7 @@ int main(void)
   Speed_PID_Init(&leftMotor_PID);
   Speed_PID_Init(&rightMotor_PID);
   Trail_PID_Init(&trailMotor_PID);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -190,9 +205,9 @@ int main(void)
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -200,8 +215,8 @@ void SystemClock_Config(void)
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
-   * in the RCC_OscInitTypeDef structure.
-   */
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
@@ -215,8 +230,9 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -242,6 +258,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
+    // uint16_t distance is the distance in millimeters.
+    // statInfo_t_VL53L0X distanceStr is the statistics read from the sensor.
     GetKeyStatus();
     GirdsNumber();
     GetEncoderPulse();
@@ -255,6 +273,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     // printf("data:%.2f,%.2f,%.2f\r\n", leftSpeed, rightSpeed, leftTargetSpeed);
     // printf("x = %d, y = %d\r\n", RedX, RedY);
+
+    //-------------------------测距----------------------------------------------------
+    if (tim1Count == 3) // 30ms
+    {
+      distance = readRangeSingleMillimeters(&distanceStr);
+    }
 
     //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100) // 1S
@@ -468,6 +492,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Main_Loop()
 {
   OLEDShow();
+
   if (mode[0] == 1)
     Basic_1();
   else if (mode[1] == 1)
@@ -680,7 +705,7 @@ void OLEDShow()
   sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
   OLED_ShowString(0, 1, (char *)speedString, 12, 0);
 
-  sprintf(colorPostion, "x:%d y:%d girdNum:%d    ", RedX, RedY, girdsNum);
+  sprintf(colorPostion, "x:%d y:%d gird:%d    ", RedX, RedY, girdsNum);
   OLED_ShowString(0, 2, (char *)colorPostion, 12, 0);
   // sprintf(colorPostion, "y:%d ", RedY);
   // OLED_ShowString(60, 1, (char *)colorPostion, 12, 0);
@@ -694,6 +719,9 @@ void OLEDShow()
   OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
   sprintf(colorPostion, "circle: %d, %d        ", circlePosition[0], circlePosition[1]);
   OLED_ShowString(0, 5, (char *)colorPostion, 12, 0);
+
+  sprintf(colorPostion, "distance: %d    ", distance);
+  OLED_ShowString(0, 6, (char *)colorPostion, 12, 0);
 }
 
 void MPU6050_GetData() // 获取MPU6050的数值
@@ -760,9 +788,9 @@ void findTwoLargestIndex(int a[], int *firstIndex, int *secondIndex)
 /* USER CODE END 4 */
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -774,14 +802,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

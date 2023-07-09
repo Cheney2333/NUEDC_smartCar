@@ -23,20 +23,19 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 
-  /* Private includes ----------------------------------------------------------*/
-  /* USER CODE BEGIN Includes */
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 
-  /* USER CODE END Includes */
+/* USER CODE END Includes */
 
-  /* Exported types ------------------------------------------------------------*/
-  /* USER CODE BEGIN ET */
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
   typedef struct
   {
     int a; // 三角形
@@ -44,22 +43,22 @@ extern "C"
     int c; // 圆形
   } GIRD;
 
-  /* USER CODE END ET */
+/* USER CODE END ET */
 
-  /* Exported constants --------------------------------------------------------*/
-  /* USER CODE BEGIN EC */
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
 
-  /* USER CODE END EC */
+/* USER CODE END EC */
 
-  /* Exported macro ------------------------------------------------------------*/
-  /* USER CODE BEGIN EM */
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
 
-  /* USER CODE END EM */
+/* USER CODE END EM */
 
-  /* Exported functions prototypes ---------------------------------------------*/
-  void Error_Handler(void);
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
 
-  /* USER CODE BEGIN EFP */
+/* USER CODE BEGIN EFP */
   void MPU6050_GetData(void);
   void Main_Loop(void);
   void OLEDShow(void);
@@ -106,6 +105,10 @@ extern "C"
 #define LED_RED_GPIO_Port GPIOE
 #define LED_GREEN_Pin GPIO_PIN_15
 #define LED_GREEN_GPIO_Port GPIOE
+#define VL53L0X_SCL_Pin GPIO_PIN_10
+#define VL53L0X_SCL_GPIO_Port GPIOB
+#define VL53L0X_SDA_Pin GPIO_PIN_11
+#define VL53L0X_SDA_GPIO_Port GPIOB
 #define PWMA_Pin GPIO_PIN_14
 #define PWMA_GPIO_Port GPIOD
 #define PWMB_Pin GPIO_PIN_15
@@ -139,7 +142,7 @@ extern "C"
 #define KEY2 HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin)
 #define KEY3 HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin)
 #define KEY4 HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin)
-  /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

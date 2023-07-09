@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../HARDWARE/OLED;../HARDWARE/BLUETOOTH;../HARDWARE/MPU6050;../HARDWARE/TSL1401</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../HARDWARE/OLED;../HARDWARE/BLUETOOTH;../HARDWARE/MPU6050;../HARDWARE/TSL1401;../HARDWARE/VL53L0x</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -838,6 +838,11 @@
               <FileName>CCD_TSL1401.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\TSL1401\CCD_TSL1401.c</FilePath>
+            </File>
+            <File>
+              <FileName>VL53L0x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\VL53L0x\VL53L0x.c</FilePath>
             </File>
           </Files>
         </Group>
