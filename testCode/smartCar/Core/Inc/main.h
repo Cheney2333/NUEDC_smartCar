@@ -109,6 +109,8 @@ void Error_Handler(void);
 #define VL53L0X_SCL_GPIO_Port GPIOB
 #define VL53L0X_SDA_Pin GPIO_PIN_11
 #define VL53L0X_SDA_GPIO_Port GPIOB
+#define TCRT_2_D0_Pin GPIO_PIN_12
+#define TCRT_2_D0_GPIO_Port GPIOD
 #define PWMA_Pin GPIO_PIN_14
 #define PWMA_GPIO_Port GPIOD
 #define PWMB_Pin GPIO_PIN_15
