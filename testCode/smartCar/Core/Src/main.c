@@ -313,9 +313,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         if (girdsNum == 25) // 去程抵达终点
         {
+          leftTargetSpeed = 0;
+          rightTargetSpeed = 0; // 停车
+          MotorControl(0, 0);
+
           backStatus = 1;
           direction = 1; // 进入返程模式
-          // girdsNum = -1; // 格子计数清零
         }
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
@@ -380,6 +383,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         {
           backStatus = 5;
           direction = 4; // 进入返程模式
+          LED_GREEN_OFF;
         }
         MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
       }
@@ -503,7 +507,9 @@ void Basic_1()
     if (direction == 1 && backStatus == 1) // 起始返程
     {
       leftTargetSpeed = 0;
-      rightTargetSpeed = 0; // 停车
+      rightTargetSpeed = 0;
+      MotorControl(0, 0); // 停车
+
       BUZZER_ON;
       HAL_Delay(400);
       BUZZER_OFF;      // 蜂鸣示意抵达终点
