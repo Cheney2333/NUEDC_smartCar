@@ -586,6 +586,7 @@ void Basic_2()
     MotorControl(0, 0);
     LED_GREEN_OFF;
     LED_RED_OFF;
+    BUZZER_OFF;
     direction = 5;
   }
 }
