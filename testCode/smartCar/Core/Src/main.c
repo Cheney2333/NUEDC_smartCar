@@ -271,7 +271,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (ledRedCount > 100 && direction == 4) // 红灯闪烁，间隔1秒
     {
       HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-      // HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
+      HAL_GPIO_TogglePin(Buzzer_IO_GPIO_Port, Buzzer_IO_Pin);
       ledRedCount = 0;
     }
 
@@ -561,6 +561,7 @@ void Basic_2()
     HAL_Delay(100);
     MotorControl(0, 0);
     LED_GREEN_OFF;
+    LED_RED_OFF;
   }
 }
 

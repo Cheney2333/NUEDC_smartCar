@@ -54,6 +54,8 @@ extern int RedX, RedY;
 extern int girdsNum;
 
 extern int Triangle[26], Square[26], Circle[26];
+
+extern int direction;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -285,15 +287,37 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   {
     if (Uart3RxBuff == '1') // 检测到三角形
     {
-      Triangle[girdsNum + 1]++;
+      if (direction == 0)
+      {
+        Triangle[girdsNum + 1]++;
+      }
+      else
+      {
+        Triangle[girdsNum - 1]++;
+      }
     }
     else if (Uart3RxBuff == '2') // 检测到正方形
     {
-      Square[girdsNum + 1]++;
+      if (direction == 0)
+      {
+        Square[girdsNum + 1]++;
+      }
+      else
+      {
+        Square[girdsNum - 1]++;
+      }
     }
     else if (Uart3RxBuff == '3') // 检测到圆形
     {
-      Circle[girdsNum + 1]++;
+      if (direction == 0)
+      {
+        Circle[girdsNum + 1]++;
+        /* code */
+      }
+      else
+      {
+        Circle[girdsNum - 1]++;
+      }
     }
 
     if (__HAL_UART_GET_FLAG(&huart3, UART_FLAG_ORE)) // 溢出标志
