@@ -3,6 +3,7 @@
 "test_function\main.o"
 "test_function\gpio.o"
 "test_function\adc.o"
+"test_function\dma.o"
 "test_function\spi.o"
 "test_function\tim.o"
 "test_function\stm32f4xx_it.o"

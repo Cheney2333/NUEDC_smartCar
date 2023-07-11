@@ -1,24 +1,25 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -46,13 +47,17 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint32_t adc1_val_buf[ADC1_CHANNEL_CNT * ADC1_CHANNEL_FRE]; // 传递给DMA存放多通道采样值的数组
+uint32_t value[ADC1_CHANNEL_CNT] = {0};                     // 多通道的平均采样值的数组
+float temp = 0.0;
 
+char LCD_Str[20] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void LCD_Test_Clear(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -61,9 +66,9 @@ void LCD_Test_Clear(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -88,18 +93,24 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_SPI3_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-SPI_LCD_Init(); // SPI LCD?????
+  SPI_LCD_Init(); // SPI LCD初始化
+
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&adc1_val_buf, (ADC1_CHANNEL_CNT));
+  HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		LCD_Test_Clear();
+    LCD_Show();
+    HAL_Delay(1000);
+    tempCalcu();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -108,22 +119,22 @@ SPI_LCD_Init(); // SPI LCD?????
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -139,9 +150,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -154,58 +164,36 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void LCD_Test_Clear(void)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  uint8_t i = 0; // ????
-
-  LCD_SetDirection(Direction_V);
-  LCD_SetTextFont(&CH_Font24); // ??2424????,ASCII?????2412
-  LCD_SetColor(LCD_WHITE);     // ??????
-
-  for (i = 0; i < 8; i++)
+  if (htim == &htim1)
   {
-    switch (i) // ?????
-    {
-    case 0:
-      LCD_SetBackColor(LCD_BLACK);
-      break;
-    case 1:
-      LCD_SetBackColor(LIGHT_GREEN);
-      break;
-    case 2:
-      LCD_SetBackColor(LIGHT_BLUE);
-      break;
-    case 3:
-      LCD_SetBackColor(LIGHT_YELLOW);
-      break;
-    case 4:
-      LCD_SetBackColor(LIGHT_CYAN);
-      break;
-    case 5:
-      LCD_SetBackColor(LIGHT_GREY);
-      break;
-    case 6:
-      LCD_SetBackColor(LIGHT_MAGENTA);
-      break;
-    case 7:
-      LCD_SetBackColor(LCD_WHITE);
-      break;
-    default:
-      break;
-    }
-    LCD_Clear(); // ??
-    LCD_DisplayText(13, 70, "STM32 testtest");
-    LCD_DisplayText(13, 106, "res:240*280");
-    LCD_DisplayText(13, 142, "control:ST7789");
-    HAL_Delay(1000); // ??
+    
   }
+}
+void LCD_Show(void)
+{
+  LCD_SetDirection(Direction_V);
+  LCD_SetTextFont(&CH_Font24);
+  LCD_SetColor(LCD_WHITE);
+  LCD_SetBackColor(LCD_BLACK);
+
+  sprintf(LCD_Str, "temp: %.1f", temp);
+  LCD_DisplayText(13, 70, LCD_Str);
+}
+void tempCalcu(void)
+{
+  
+  float tempp = 0.0;
+  tempp = (float)adc1_val_buf[2] * 3300 / 4096; // uint: mV
+  temp = (float)((tempp - 760) / 2500 + 25);
 }
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -217,14 +205,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
