@@ -10,6 +10,8 @@
         "usart.h": "c",
         "i2c.h": "c",
         "adc.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "lcd_spi_169.h": "c",
+        "lcd_fonts.h": "c"
     }
 }
