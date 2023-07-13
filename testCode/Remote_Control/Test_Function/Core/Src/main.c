@@ -22,11 +22,13 @@
 #include "dma.h"
 #include "spi.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lcd_spi_169.h"
+#include "remoteControl.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +54,9 @@ float ADC_Value[ADC_CHANNEL_COUNT];                                 // 保存计
 float temperature = 0.0;                                            // 内部温度传感器
 
 char LCD_Str[50] = {0};
+
+extern float TargetSpeed[2]; // 0为左轮速度，1为右轮速度
+extern float refrenceVR[2];  // 参考电压，即二者速度为0时的基准电压
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,6 +102,7 @@ int main(void)
   MX_ADC1_Init();
   MX_SPI3_Init();
   MX_TIM1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   SPI_LCD_Init(); // SPI LCD初始化
   HAL_TIM_Base_Start_IT(&htim1);
@@ -166,6 +172,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1) // 10ms中断
   {
+    Speed_Calculate();
   }
 }
 void LCD_Show(void)
@@ -181,6 +188,10 @@ void LCD_Show(void)
   LCD_DisplayText(13, 70, LCD_Str);
   sprintf(LCD_Str, "temp = %.2f   ", temperature);
   LCD_DisplayText(13, 100, LCD_Str);
+  sprintf(LCD_Str, "leftSpeed = %.2f   ", TargetSpeed[0]);
+  LCD_DisplayText(13, 130, LCD_Str);
+  sprintf(LCD_Str, "rightSpeed = %.2f   ", TargetSpeed[1]);
+  LCD_DisplayText(13, 160, LCD_Str);
 }
 /* USER CODE END 4 */
 

@@ -1,5 +1,5 @@
-test_function/lcd_spi_169.o: ..\HARDWARE\LCD_SPI_169\lcd_spi_169.c \
-  ..\HARDWARE\LCD_SPI_169\lcd_spi_169.h ..\Core\Inc\main.h \
+test_function/stm32f4xx_hal_uart.o: \
+  ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Core\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
@@ -35,7 +35,4 @@ test_function/lcd_spi_169.o: ..\HARDWARE\LCD_SPI_169\lcd_spi_169.c \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_spi.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
-  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
-  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h ..\Core\Inc\spi.h \
-  ..\HARDWARE\LCD_SPI_169\lcd_fonts.h \
-  ..\HARDWARE\LCD_SPI_169\lcd_image.h
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h

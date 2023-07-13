@@ -1,0 +1,39 @@
+/* USER CODE BEGIN Header */
+/**
+ ******************************************************************************
+ * @file           : remoteControl.h
+ * @brief          : Header for remoteControl.c file.
+ * @date           : 2023/07/13
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
+
+#include "main.h"
+/* USER CODE END Header */
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __REMOTECONTROL_H
+#define __REMOTECONTROL_H
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+void RefrenceVR_Init(void);
+void Speed_Calculate(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __REMOTECONTROL_H */

@@ -6,6 +6,7 @@
 "test_function\dma.o"
 "test_function\spi.o"
 "test_function\tim.o"
+"test_function\usart.o"
 "test_function\stm32f4xx_it.o"
 "test_function\stm32f4xx_hal_msp.o"
 "test_function\stm32f4xx_hal_adc.o"
@@ -27,10 +28,12 @@
 "test_function\stm32f4xx_hal_spi.o"
 "test_function\stm32f4xx_hal_tim.o"
 "test_function\stm32f4xx_hal_tim_ex.o"
+"test_function\stm32f4xx_hal_uart.o"
 "test_function\system_stm32f4xx.o"
 "test_function\lcd_fonts.o"
 "test_function\lcd_image.o"
 "test_function\lcd_spi_169.o"
+"test_function\remotecontrol.o"
 --library_type=microlib --strict --scatter "Test_Function\Test_Function.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
