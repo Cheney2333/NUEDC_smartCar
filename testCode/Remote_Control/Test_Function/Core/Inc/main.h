@@ -55,6 +55,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
     void LCD_Show(void);
     void GET_ADC_VALUE(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -66,6 +67,10 @@ void Error_Handler(void);
 #define VRy_GPIO_Port GPIOC
 #define SW_Pin GPIO_PIN_2
 #define SW_GPIO_Port GPIOG
+#define SW_EXTI_IRQn EXTI2_IRQn
+#define KEY_Pin GPIO_PIN_15
+#define KEY_GPIO_Port GPIOA
+#define KEY_EXTI_IRQn EXTI15_10_IRQn
 
 /* USER CODE BEGIN Private defines */
 #define ADC_CHANNEL_COUNT 3   // ADC通道数量
