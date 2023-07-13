@@ -21,10 +21,7 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-#include "main.h"
-extern volatile uint16_t adcBuffer[ADC_CHANNEL_COUNT]; // 保存ADC转换后的数值
-extern float ADC_Value[ADC_CHANNEL_COUNT];             // 保存计算后的数值
-extern float temperature;
+
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
@@ -45,7 +42,7 @@ void MX_ADC1_Init(void)
   /* USER CODE END ADC1_Init 1 */
 
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-   */
+  */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -64,7 +61,7 @@ void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-   */
+  */
   sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
@@ -74,7 +71,7 @@ void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-   */
+  */
   sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -83,7 +80,7 @@ void MX_ADC1_Init(void)
   }
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-   */
+  */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -93,17 +90,18 @@ void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
 }
 
-void HAL_ADC_MspInit(ADC_HandleTypeDef *adcHandle)
+void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if (adcHandle->Instance == ADC1)
+  if(adcHandle->Instance==ADC1)
   {
-    /* USER CODE BEGIN ADC1_MspInit 0 */
+  /* USER CODE BEGIN ADC1_MspInit 0 */
 
-    /* USER CODE END ADC1_MspInit 0 */
+  /* USER CODE END ADC1_MspInit 0 */
     /* ADC1 clock enable */
     __HAL_RCC_ADC1_CLK_ENABLE();
 
@@ -112,7 +110,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *adcHandle)
     PC0     ------> ADC1_IN10
     PC1     ------> ADC1_IN11
     */
-    GPIO_InitStruct.Pin = VRx_Pin | VRy_Pin;
+    GPIO_InitStruct.Pin = VRx_Pin|VRy_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -124,8 +122,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *adcHandle)
     hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
     hdma_adc1.Init.Priority = DMA_PRIORITY_VERY_HIGH;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
@@ -134,22 +132,22 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *adcHandle)
       Error_Handler();
     }
 
-    __HAL_LINKDMA(adcHandle, DMA_Handle, hdma_adc1);
+    __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc1);
 
-    /* USER CODE BEGIN ADC1_MspInit 1 */
+  /* USER CODE BEGIN ADC1_MspInit 1 */
 
-    /* USER CODE END ADC1_MspInit 1 */
+  /* USER CODE END ADC1_MspInit 1 */
   }
 }
 
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef *adcHandle)
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 {
 
-  if (adcHandle->Instance == ADC1)
+  if(adcHandle->Instance==ADC1)
   {
-    /* USER CODE BEGIN ADC1_MspDeInit 0 */
+  /* USER CODE BEGIN ADC1_MspDeInit 0 */
 
-    /* USER CODE END ADC1_MspDeInit 0 */
+  /* USER CODE END ADC1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_ADC1_CLK_DISABLE();
 
@@ -157,36 +155,16 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef *adcHandle)
     PC0     ------> ADC1_IN10
     PC1     ------> ADC1_IN11
     */
-    HAL_GPIO_DeInit(GPIOC, VRx_Pin | VRy_Pin);
+    HAL_GPIO_DeInit(GPIOC, VRx_Pin|VRy_Pin);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);
-    /* USER CODE BEGIN ADC1_MspDeInit 1 */
+  /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
-    /* USER CODE END ADC1_MspDeInit 1 */
+  /* USER CODE END ADC1_MspDeInit 1 */
   }
 }
 
 /* USER CODE BEGIN 1 */
-void GET_HW_RV(void)
-{
-  uint32_t sum[3] = {0};
-  float averageValue[3] = {0};
-  // for (int i = 0; i < ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT;)
-  // {
-  //   sum[0] += adcBuffer[i++];
-  //   sum[1] += adcBuffer[i++];
-  //   sum[2] += adcBuffer[i++];
-  // }
-  // for (int i = 0; i < ADC_CHANNEL_COUNT; i++) // 平均值滤波
-  // {
-  //   averageValue[i] = (float)sum[i] / ADC_AVERAGE_COUNT;
-  // }
-  for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++)
-  {
-    // ADC_Value[i] = (float)averageValue[i] * 3.3 / 4096;
-    ADC_Value[i] = adcBuffer[i] * 3.3 / 4096;
-  }
-  temperature = (ADC_Value[2] - V25) / AVG_SLOPE + 25;
-}
+
 /* USER CODE END 1 */
