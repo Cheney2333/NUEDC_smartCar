@@ -234,11 +234,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
   if (hadc->Instance == ADC1)
   {
-    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++)
+    uint32_t sum[ADC_CHANNEL_COUNT] = {0};                          // 缓冲区求和
+    float averageValue[ADC_CHANNEL_COUNT] = {0};                    // 单个通道的平均值
+    for (uint16_t i = 0; i < ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT;) // 各个通道求和
     {
-      ADC_Value[i] = adcBuffer[i] * 3.3 / 4096;
+      sum[0] += adcBuffer[i++];
+      sum[1] += adcBuffer[i++];
+      sum[2] += adcBuffer[i++];
     }
-    temperature = (ADC_Value[2] - V25) / AVG_SLOPE + 25;
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) // 平均值滤波
+    {
+      averageValue[i] = sum[i] / ADC_AVERAGE_COUNT;
+    }
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) // 平均值滤波
+    {
+      ADC_Value[i] = averageValue[i] * 3.3 / 4096;
+    }
+    temperature = (ADC_Value[2] - V25) / AVG_SLOPE + 25; // 内部温度传感器得到的温度
   }
 }
 /* USER CODE END 1 */

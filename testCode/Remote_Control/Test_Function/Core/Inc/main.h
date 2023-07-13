@@ -69,7 +69,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define ADC_CHANNEL_COUNT 3   // ADC通道数量
-#define ADC_AVERAGE_COUNT 10 // 单个通道采样值，用来取平均值
+#define ADC_AVERAGE_COUNT 100 // 单个通道采样值，用来取平均值
 #define V25 0.76              // unit: V
 #define AVG_SLOPE 2.5         // unit: mV/摄氏度
 /* USER CODE END Private defines */
