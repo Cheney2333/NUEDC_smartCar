@@ -47,11 +47,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t adc1_val_buf[ADC1_CHANNEL_CNT * ADC1_CHANNEL_FRE]; // 传递给DMA存放多通道采样值的数组
-uint32_t value[ADC1_CHANNEL_CNT] = {0};                     // 多通道的平均采样值的数组
-float temp = 0.0;
+volatile uint16_t adcBuffer[ADC_CHANNEL_COUNT]; // 保存ADC转换后的数值
+float ADC_Value[ADC_CHANNEL_COUNT];             // 保存计算后的数值
+float temperature = 0.0;                        // 内部温度传感器
 
-char LCD_Str[20] = {0};
+char LCD_Str[50] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,9 +99,8 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   SPI_LCD_Init(); // SPI LCD初始化
-
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&adc1_val_buf, (ADC1_CHANNEL_CNT));
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcBuffer, ADC_CHANNEL_COUNT * 2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,8 +108,8 @@ int main(void)
   while (1)
   {
     LCD_Show();
-    HAL_Delay(1000);
-    tempCalcu();
+    HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
+    // HAL_Delay(200);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -135,13 +134,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
    * in the RCC_OscInitTypeDef structure.
    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -166,9 +164,9 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim == &htim1)
+  if (htim == &htim1) // 10ms中断
   {
-    
+    GET_HW_RV();
   }
 }
 void LCD_Show(void)
@@ -178,15 +176,12 @@ void LCD_Show(void)
   LCD_SetColor(LCD_WHITE);
   LCD_SetBackColor(LCD_BLACK);
 
-  sprintf(LCD_Str, "temp: %.1f", temp);
+  sprintf(LCD_Str, "VRx = %.2fV   ", adcBuffer[0] * 3.3 / 4096);
+  LCD_DisplayText(13, 40, LCD_Str);
+  sprintf(LCD_Str, "VRy = %.2fV   ", ADC_Value[1]);
   LCD_DisplayText(13, 70, LCD_Str);
-}
-void tempCalcu(void)
-{
-  
-  float tempp = 0.0;
-  tempp = (float)adc1_val_buf[2] * 3300 / 4096; // uint: mV
-  temp = (float)((tempp - 760) / 2500 + 25);
+  sprintf(LCD_Str, "temp = %.2f   ", temperature);
+  LCD_DisplayText(13, 100, LCD_Str);
 }
 /* USER CODE END 4 */
 
