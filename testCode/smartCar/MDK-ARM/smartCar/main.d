@@ -40,4 +40,4 @@ smartcar/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\inttypes.h \
   ..\HARDWARE\MPU6050\mpu6050.h ..\HARDWARE\MPU6050\inv_mpu.h \
   ..\HARDWARE\MPU6050\inv_mpu_dmp_motion_driver.h \
-  ..\HARDWARE\TSL1401\CCD_TSL1401.h ..\HARDWARE\VL53L0x\VL53L0X.h
+  ..\HARDWARE\VL53L0x\VL53L0X.h

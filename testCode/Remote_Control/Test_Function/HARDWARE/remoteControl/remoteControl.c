@@ -34,11 +34,11 @@ void Speed_Calculate()
     }
     else if (refrenceVR[0] - ADC_Value[0] > 0) // 摇杆偏上
     {
-        speedStraight = (refrenceVR[0] - ADC_Value[0]) * 1.0 / refrenceVR[0];
+        speedStraight = (refrenceVR[0] - ADC_Value[0]) * 1.5 / refrenceVR[0];
     }
     else if (refrenceVR[0] - ADC_Value[0] < 0) // 摇杆偏下
     {
-        speedStraight = (refrenceVR[0] - ADC_Value[0]) * 1.0 / (3.3 - refrenceVR[0]);
+        speedStraight = (refrenceVR[0] - ADC_Value[0]) * 1.5 / (3.3 - refrenceVR[0]);
     }
 
     if (refrenceVR[1] - ADC_Value[1] == 0) // 摇杆无x分量
@@ -47,11 +47,11 @@ void Speed_Calculate()
     }
     else if (refrenceVR[1] - ADC_Value[1] > 0) // 摇杆偏右
     {
-        speedAroud = (refrenceVR[1] - ADC_Value[1]) * 0.15 / refrenceVR[1];
+        speedAroud = (refrenceVR[1] - ADC_Value[1]) * 0.2 / refrenceVR[1];
     }
     else if (refrenceVR[1] - ADC_Value[1] < 0) // 摇杆偏左
     {
-        speedAroud = (refrenceVR[1] - ADC_Value[1]) * 0.15 / (3.3 - refrenceVR[1]);
+        speedAroud = (refrenceVR[1] - ADC_Value[1]) * 0.2 / (3.3 - refrenceVR[1]);
     }
 
     TargetSpeed[0] = speedStraight + speedAroud; // 左轮速度

@@ -9,7 +9,7 @@ void Speed_PID_Init(PID *p)
 	p->Kp = 25.0;
 	p->Ki = 2.5;
 	p->Kd = 2.5;
-	p->Ur = 60;
+	p->Ur = 100;
 	p->PID_is_Enable = 1;
 	p->Un = 3;
 	p->En_1 = 0;

@@ -45,17 +45,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern uint8_t Uart2RxBuff;         // 进入中断接收数据的数组
-extern uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
-extern int RxLine;                  // 接收到的数据长度
-extern uint8_t Uart3RxBuff;         // 进入中断接收数据的数组
-
-extern int RedX, RedY;
-extern int girdsNum;
-
-extern int Triangle[26], Square[26], Circle[26];
-
-extern int direction;
+extern uint8_t Uart1RxBuff;         // 进入中断接收数据的数组
+extern uint8_t Uart1DataBuff[5000]; // 保存接收到的数据的数组
+extern int Rx1Line;                 // 接收到的数据长度
+extern float leftTargetSpeed, rightTargetSpeed;
+int tagetSpeed[2] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,8 +64,7 @@ extern int direction;
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -80,8 +73,8 @@ extern UART_HandleTypeDef huart3;
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
- * @brief This function handles Non maskable interrupt.
- */
+  * @brief This function handles Non maskable interrupt.
+  */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -95,8 +88,8 @@ void NMI_Handler(void)
 }
 
 /**
- * @brief This function handles Hard fault interrupt.
- */
+  * @brief This function handles Hard fault interrupt.
+  */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -110,8 +103,8 @@ void HardFault_Handler(void)
 }
 
 /**
- * @brief This function handles Memory management fault.
- */
+  * @brief This function handles Memory management fault.
+  */
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
@@ -125,8 +118,8 @@ void MemManage_Handler(void)
 }
 
 /**
- * @brief This function handles Prefetch fault, memory access fault.
- */
+  * @brief This function handles Prefetch fault, memory access fault.
+  */
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
@@ -140,8 +133,8 @@ void BusFault_Handler(void)
 }
 
 /**
- * @brief This function handles Undefined instruction or illegal state.
- */
+  * @brief This function handles Undefined instruction or illegal state.
+  */
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
@@ -155,8 +148,8 @@ void UsageFault_Handler(void)
 }
 
 /**
- * @brief This function handles System service call via SWI instruction.
- */
+  * @brief This function handles System service call via SWI instruction.
+  */
 void SVC_Handler(void)
 {
   /* USER CODE BEGIN SVCall_IRQn 0 */
@@ -168,8 +161,8 @@ void SVC_Handler(void)
 }
 
 /**
- * @brief This function handles Debug monitor.
- */
+  * @brief This function handles Debug monitor.
+  */
 void DebugMon_Handler(void)
 {
   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
@@ -181,8 +174,8 @@ void DebugMon_Handler(void)
 }
 
 /**
- * @brief This function handles Pendable request for system service.
- */
+  * @brief This function handles Pendable request for system service.
+  */
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
@@ -194,8 +187,8 @@ void PendSV_Handler(void)
 }
 
 /**
- * @brief This function handles System tick timer.
- */
+  * @brief This function handles System tick timer.
+  */
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
@@ -215,8 +208,8 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
- * @brief This function handles TIM1 update interrupt.
- */
+  * @brief This function handles TIM1 update interrupt.
+  */
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
@@ -229,104 +222,47 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
- * @brief This function handles USART2 global interrupt.
- */
-void USART2_IRQHandler(void)
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
 {
-  /* USER CODE BEGIN USART2_IRQn 0 */
+  /* USER CODE BEGIN USART1_IRQn 0 */
 
-  /* USER CODE END USART2_IRQn 0 */
-  HAL_UART_IRQHandler(&huart2);
-  /* USER CODE BEGIN USART2_IRQn 1 */
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
 
-  /* USER CODE END USART2_IRQn 1 */
-}
-
-/**
- * @brief This function handles USART3 global interrupt.
- */
-void USART3_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART3_IRQn 0 */
-
-  /* USER CODE END USART3_IRQn 0 */
-  HAL_UART_IRQHandler(&huart3);
-  /* USER CODE BEGIN USART3_IRQn 1 */
-
-  /* USER CODE END USART3_IRQn 1 */
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart == &huart2) // 判断中断源
+  if (huart == &huart1) // 判断中断源
   {
-    RxLine++;                                // 每接收到一个数据，进入回调数据长度加1
-    Uart2DataBuff[RxLine - 1] = Uart2RxBuff; // 把每次接收到的数据保存到缓存数组
+    Rx1Line++;                                // 每接收到一个数据，进入回调数据长度加1
+    Uart1DataBuff[Rx1Line - 1] = Uart1RxBuff; // 把每次接收到的数据保存到缓存数组
 
-    if (Uart2RxBuff == '\n') // 接收结束标志位
+    if (Uart1RxBuff == '\n') // 接收结束标志位
     {
-      if (sscanf((const char *)Uart2DataBuff, "x=%d,y=%d\r\n", &RedX, &RedY) == 2)
+      if (sscanf((const char *)Uart1DataBuff, "leftSpeed:%d,rightSpeed:%d\r\n", &tagetSpeed[0], &tagetSpeed[1]) == 2)
       {
+        leftTargetSpeed = (float)(tagetSpeed[0] / 100.0);
+        rightTargetSpeed = (float)(tagetSpeed[1] / 100.0);
       }
       // printf("x = %d, y = %d\r\n", RedX, RedY);
-      memset(Uart2DataBuff, 0, sizeof(Uart2DataBuff)); // 清空缓存数组
-      RxLine = 0;                                      // 清空接收长度
+      memset(Uart1DataBuff, 0, sizeof(Uart1DataBuff)); // 清空缓存数组
+      Rx1Line = 0;                                     // 清空接收长度
     }
 
-    if (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_ORE)) // 溢出标志
+    if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE)) // 溢出标志
     {
-      uint32_t temp = USART2->SR;
-      temp = USART2->DR;
+      uint32_t temp = USART1->SR;
+      temp = USART1->DR;
     }
 
-    Uart2RxBuff = 0;
-    HAL_UART_Receive_IT(&huart2, &Uart2RxBuff, 1); // 每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
-  }
-  if (huart == &huart3) // 判断中断源
-  {
-    if (Uart3RxBuff == '1') // 检测到三角形
-    {
-      if (direction == 0)
-      {
-        Triangle[girdsNum + 1]++;
-      }
-      else
-      {
-        Triangle[girdsNum - 1]++;
-      }
-    }
-    else if (Uart3RxBuff == '2') // 检测到正方形
-    {
-      if (direction == 0)
-      {
-        Square[girdsNum + 1]++;
-      }
-      else
-      {
-        Square[girdsNum - 1]++;
-      }
-    }
-    else if (Uart3RxBuff == '3') // 检测到圆形
-    {
-      if (direction == 0)
-      {
-        Circle[girdsNum + 1]++;
-      }
-      else
-      {
-        Circle[girdsNum - 1]++;
-      }
-    }
-
-    if (__HAL_UART_GET_FLAG(&huart3, UART_FLAG_ORE)) // 溢出标志
-    {
-      uint32_t temp = USART3->SR;
-      temp = USART3->DR;
-    }
-
-    Uart3RxBuff = 0;
-    HAL_UART_Receive_IT(&huart3, &Uart3RxBuff, 1); // 每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
+    Uart1RxBuff = 0;
+    HAL_UART_Receive_IT(&huart1, &Uart1RxBuff, 1); // 每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
   }
 }
 /* USER CODE END 1 */
