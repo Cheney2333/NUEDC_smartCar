@@ -1,0 +1,54 @@
+project:
+  linker:
+    - script: Test_Function_TestFunction.sct
+  groups:
+    - group: Application/MDK-ARM
+      files:
+        - file: startup_stm32f407xx.s
+          misc:
+            - ASM:
+                - -masm=auto
+    - group: Application/User/Core
+      files:
+        - file: ../Core/Src/main.c
+        - file: ../Core/Src/gpio.c
+        - file: ../Core/Src/adc.c
+        - file: ../Core/Src/dma.c
+        - file: ../Core/Src/spi.c
+        - file: ../Core/Src/tim.c
+        - file: ../Core/Src/usart.c
+        - file: ../Core/Src/stm32f4xx_it.c
+        - file: ../Core/Src/stm32f4xx_hal_msp.c
+    - group: Drivers/STM32F4xx_HAL_Driver
+      files:
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_adc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
+    - group: Drivers/CMSIS
+      files:
+        - file: ../Core/Src/system_stm32f4xx.c
+    - group: HARDWARE
+      files:
+        - file: ../HARDWARE/LCD_SPI_169/lcd_fonts.c
+        - file: ../HARDWARE/LCD_SPI_169/lcd_image.c
+        - file: ../HARDWARE/LCD_SPI_169/lcd_spi_169.c
+        - file: ../HARDWARE/remoteControl/remoteControl.c
+  components:
+    - component: ARM::CMSIS:CORE
