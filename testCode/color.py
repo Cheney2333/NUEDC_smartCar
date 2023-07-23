@@ -17,7 +17,7 @@ sensor.skip_frames(time = 2000)
 # 配置串口
 #fm.register(5, fm.fpioa.UART1_TX, force=True)
 #fm.register(4, fm.fpioa.UART1_RX, force=True)
-#uart = UART(UART.UART1, 115200, 8, 0, 1, timeout=1000, read_buf_len=4096)
+uart = UART(UART.UART1, 115200, 8, 0, 1, timeout=1000, read_buf_len=4096)
 
 thresholds = (9, 96, 4, 32, 5, 32)   # 红色阈值
 
