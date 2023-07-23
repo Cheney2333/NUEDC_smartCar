@@ -4,8 +4,6 @@
 
 extern short encoderPulse[2];
 extern float pitch, roll, yaw; // 欧拉角
-extern float leftTargetSpeed, rightTargetSpeed;
-extern PID leftMotor_PID, rightMotor_PID;
 
 void AMotor_Go() // LeftPostive:LIN1=1,LIN2=0,PB0=1,PB1=0
 {
@@ -106,34 +104,3 @@ float CalActualSpeed(int pulse)
   return (float)(0.01349 * pulse); // unit: m/s
 }
 
-/**
- * @brief  左直角弯
- * @param  targetAngle, currentAngle
- * @retval None
- */
-void LeftBend(float refrenceAngle)
-{
-  while (pitch - refrenceAngle < 89.5)
-  {
-    leftTargetSpeed = -0.10;
-    rightTargetSpeed = 0.10;
-    MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
-  }
-  MotorControl(0, 0);
-}
-
-/**
- * @brief  右直角弯
- * @param  targetAngle, currentAngle
- * @retval None
- */
-void RightBend(float refrenceAngle)
-{
-  while (pitch - refrenceAngle > -89.5)
-  {
-    leftTargetSpeed = 0.10;
-    rightTargetSpeed = -0.10;
-    MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
-  }
-  MotorControl(0, 0);
-}

@@ -7,7 +7,8 @@
         "adc.h": "c",
         "dma.h": "c",
         "winapifamily.h": "c",
-        "remotecontrol.h": "c"
+        "remotecontrol.h": "c",
+        "tim.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

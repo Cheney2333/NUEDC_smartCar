@@ -1,0 +1,14 @@
+{
+	"tasks": [
+		{
+			"type": "cmsis-csolution.build",
+			"solution": "${command:cmsis-csolution.getSolutionPath}",
+			"project": "${command:cmsis-csolution.getProjectPath}",
+			"buildType": "${command:cmsis-csolution.getBuildType}",
+			"targetType": "${command:cmsis-csolution.getTargetType}",
+			"rebuild": false,
+			"problemMatcher": [],
+			"label": "cmsis-csolution.build: Build"
+		}
+	]
+}

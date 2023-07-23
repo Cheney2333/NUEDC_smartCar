@@ -40,8 +40,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-PID leftMotor_PID;
-PID rightMotor_PID;
+PID Motor_PID[2];
 PID trailMotor_PID;
 /* USER CODE END PTD */
 
@@ -69,9 +68,8 @@ float pitch, roll, yaw;    // 欧拉角
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
 
 short encoderPulse[2] = {0}; // 编码器脉冲数
-float leftSpeed = 0, rightSpeed = 0;
-
-float leftTargetSpeed = 0.10, rightTargetSpeed = 0.10;
+float wheelSpeed[2] = {0};   // 0为左轮，1为右轮，本工程中均如此
+float targetSpeed[2] = {0.10, 0.10};
 
 uint8_t Uart1RxBuff;         // 进入中断接收数据的数组
 uint8_t Uart1DataBuff[5000]; // 保存接收到的数据的数组
@@ -162,8 +160,8 @@ int main(void)
   __HAL_TIM_SET_COUNTER(&htim2, 0);
   __HAL_TIM_SET_COUNTER(&htim3, 0); // initialize encoder timing and set it to 3000
 
-  Speed_PID_Init(&leftMotor_PID);
-  Speed_PID_Init(&rightMotor_PID);
+  Speed_PID_Init(&Motor_PID[0]);
+  Speed_PID_Init(&Motor_PID[1]);
   Trail_PID_Init(&trailMotor_PID);
 
   /* USER CODE END 2 */
@@ -173,7 +171,6 @@ int main(void)
   while (1)
   {
     OLEDShow();
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -233,13 +230,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim1) // htim1 100Hz 10ms
   {
     GetEncoderPulse();
-    leftSpeed = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
-    rightSpeed = CalActualSpeed(encoderPulse[1]);
+    wheelSpeed[0] = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
+    wheelSpeed[1] = CalActualSpeed(encoderPulse[1]);
 
-    Speed_PID(leftTargetSpeed, leftSpeed, &leftMotor_PID); // 根据目标速度和实际速度计算PID参数
-    Speed_PID(rightTargetSpeed, rightSpeed, &rightMotor_PID);
+    Speed_PID(targetSpeed[0], wheelSpeed[0], &Motor_PID[0]); // 根据目标速度和实际速度计算PID参数
+    Speed_PID(targetSpeed[1], wheelSpeed[1], &Motor_PID[1]);
 
-    MotorControl(leftMotor_PID.PWM, rightMotor_PID.PWM);
+    MotorControl(Motor_PID[0].PWM, Motor_PID[1].PWM);
     //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100)
     {
@@ -254,7 +251,7 @@ void OLEDShow()
   sprintf(voltage, "voltage:%.1fV", batteryVoltage);
   OLED_ShowString(0, 0, (char *)voltage, 12, 0);
 
-  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", leftSpeed, rightSpeed);
+  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", wheelSpeed[0], wheelSpeed[1]);
   OLED_ShowString(0, 2, (char *)speedString, 12, 0);
 
   sprintf(colorPostion, "distance: %d    ", distance);
