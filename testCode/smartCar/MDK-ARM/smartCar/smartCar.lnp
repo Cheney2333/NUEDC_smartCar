@@ -5,6 +5,7 @@
 "smartcar\main.o"
 "smartcar\gpio.o"
 "smartcar\adc.o"
+"smartcar\dma.o"
 "smartcar\i2c.o"
 "smartcar\tim.o"
 "smartcar\usart.o"

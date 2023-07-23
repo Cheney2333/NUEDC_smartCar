@@ -50,6 +50,10 @@ extern uint8_t Uart1DataBuff[5000]; // 保存接收到的数据的数组
 extern int Rx1Line;                 // 接收到的数据长度
 extern float targetSpeed[2];
 int speed[2] = {0};
+
+extern volatile uint32_t adcBuffer[ADC_CHANNEL_COUNT]; // 保存ADC转换后的数值
+extern float ADC_Value[ADC_CHANNEL_COUNT];             // 保存计算后的数值
+extern float temperature;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +67,7 @@ int speed[2] = {0};
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim1;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
@@ -208,6 +213,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+ * @brief This function handles DMA1 channel1 global interrupt.
+ */
+void DMA1_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
+
+/**
  * @brief This function handles TIM1 update interrupt.
  */
 void TIM1_UP_IRQHandler(void)
@@ -236,6 +255,28 @@ void USART1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+  if (hadc->Instance == ADC1)
+  {
+    uint32_t sum[ADC_CHANNEL_COUNT] = {0};                           // 缓冲区求和
+    float averageValue[ADC_CHANNEL_COUNT] = {0};                     // 单个通道的平均值
+    for (uint16_t i = 0; i < ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT;) // 各个通道求和
+    {
+      sum[0] += adcBuffer[i++];
+      sum[1] += adcBuffer[i++];
+    }
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) // 平均值滤波
+    {
+      averageValue[i] = sum[i] / ADC_AVERAGE_COUNT;
+    }
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++)
+    {
+      ADC_Value[i] = averageValue[i] * 3.3 / 4096;
+    }
+    // temperature = (ADC_Value[2] - V25) / AVG_SLOPE + 25; // 内部温度传感器得到的温度
+  }
+}
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart == &huart1) // 判断中断源

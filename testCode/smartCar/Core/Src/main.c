@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -66,6 +67,10 @@ int tim1Count = 0; // 中断计时
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
 short gyrox, gyroy, gyroz; // 陀螺仪原始数据
+
+volatile uint32_t adcBuffer[ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT]; // 保存ADC转换后的数值
+float ADC_Value[ADC_CHANNEL_COUNT];                                 // 保存计算后的数值
+float temperature = 0.0;                                            // 内部温度传感器
 
 short encoderPulse[2] = {0}; // 编码器脉冲数
 float wheelSpeed[2] = {0};   // 0为左轮，1为右轮，本工程中均如此
@@ -119,6 +124,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
@@ -153,6 +159,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_2);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // start encoder timer
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcBuffer, ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT);
   // HAL_ADCEx_Calibration_Start(&CCD_AO_hadc);
   __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE); // start encoder timer to update interrupts and prevent overflow processing
@@ -240,7 +247,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100)
     {
-      batteryVoltage = adcGetBatteryVoltage();
+      batteryVoltage = ADC_Value[0] * 5.0;
       tim1Count = 0;
     }
   }
