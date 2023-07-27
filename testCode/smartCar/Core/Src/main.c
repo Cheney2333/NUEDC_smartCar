@@ -59,10 +59,7 @@ PID trailMotor_PID;
 
 /* USER CODE BEGIN PV */
 int testPWM = 20;
-char voltage[20];
-char mpuString[10];
-char speedString[22];
-char colorPostion[30];
+char oledString[30];
 int tim1Count = 0; // 中断计时
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
@@ -72,9 +69,12 @@ volatile uint32_t adcBuffer[ADC_CHANNEL_COUNT * ADC_AVERAGE_COUNT]; // 保存ADC
 float ADC_Value[ADC_CHANNEL_COUNT];                                 // 保存计算后的数值
 float temperature = 0.0;                                            // 内部温度传感器
 
-short encoderPulse[2] = {0}; // 编码器脉冲数
-float wheelSpeed[2] = {0};   // 0为左轮，1为右轮，本工程中均如此
-float targetSpeed[2] = {0.10, 0.10};
+short encoderPulse[2] = {0};    // 编码器脉冲数
+int totalEncoderPulse[2] = {0}; // 编码器总脉冲数
+float wheelTurns[2] = {0};      // 行驶的总圈数
+float totalDistance = 0.0;      // 行驶的路程
+float wheelSpeed[2] = {0};      // 0为左轮，1为右轮，本工程中均如此
+float targetSpeed[2] = {0.0, 0.0};
 
 uint8_t Uart1RxBuff;         // 进入中断接收数据的数组
 uint8_t Uart1DataBuff[5000]; // 保存接收到的数据的数组
@@ -237,6 +237,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim1) // htim1 100Hz 10ms
   {
     GetEncoderPulse();
+    wheelTurns[0] = CalNumberOfTurns(totalEncoderPulse[0]);
+    wheelTurns[1] = CalNumberOfTurns(totalEncoderPulse[1]);
     wheelSpeed[0] = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     wheelSpeed[1] = CalActualSpeed(encoderPulse[1]);
 
@@ -255,14 +257,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void OLEDShow()
 {
-  sprintf(voltage, "voltage:%.1fV", batteryVoltage);
-  OLED_ShowString(0, 0, (char *)voltage, 12, 0);
+  sprintf(oledString, "voltage:%.1fV", batteryVoltage);
+  OLED_ShowString(0, 0, (char *)oledString, 12, 0);
 
-  sprintf(speedString, "A:%.2fm/s B:%.2fm/s", wheelSpeed[0], wheelSpeed[1]);
-  OLED_ShowString(0, 2, (char *)speedString, 12, 0);
+  sprintf(oledString, "A:%.2fm/s B:%.2fm/s", wheelSpeed[0], wheelSpeed[1]);
+  OLED_ShowString(0, 2, (char *)oledString, 12, 0);
 
-  sprintf(colorPostion, "distance: %d    ", distance);
-  OLED_ShowString(0, 4, (char *)colorPostion, 12, 0);
+  sprintf(oledString, "distance: %d    ", distance);
+  OLED_ShowString(0, 4, (char *)oledString, 12, 0);
+
+  sprintf(oledString, "At:%.2f Bt:%.2f  ", wheelTurns[0], wheelTurns[1]);
+  OLED_ShowString(0, 6, (char *)oledString, 12, 0);
 }
 
 void MPU6050_GetData() // 获取MPU6050的数值

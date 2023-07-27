@@ -40,6 +40,7 @@ extern "C"
   void MotorControl(int AMotorPWM, int BMotorPWM);
   void GetEncoderPulse(void);
   float CalActualSpeed(int pulse);
+  float CalNumberOfTurns(int totalPulse);
 
 #ifdef __cplusplus
 }

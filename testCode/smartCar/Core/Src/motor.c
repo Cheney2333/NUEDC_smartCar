@@ -3,7 +3,8 @@
 #include "pid.h"
 
 extern short encoderPulse[2];
-extern float pitch, roll, yaw; // 欧拉角
+extern int wheelTurns[2];
+extern int totalEncoderPulse[2];
 
 void AMotor_Go() // LeftPostive:LIN1=1,LIN2=0,PB0=1,PB1=0
 {
@@ -45,6 +46,9 @@ void GetEncoderPulse()
 {
   encoderPulse[0] = ((short)__HAL_TIM_GET_COUNTER(&htim2)); // 电机A,左轮
   encoderPulse[1] = -((short)__HAL_TIM_GET_COUNTER(&htim3));
+
+  totalEncoderPulse[0] += encoderPulse[0]; // 总脉冲数计数
+  totalEncoderPulse[1] += encoderPulse[1];
 
   __HAL_TIM_GET_COUNTER(&htim2) = 0; // 计数值重新清零
   __HAL_TIM_GET_COUNTER(&htim3) = 0;
@@ -96,7 +100,7 @@ void MotorControl(int AMotorPWM, int BMotorPWM)
 
 /**
  * @brief  calculate speed based on the obtained encoder pulse value, unit m/s
- * @param pulse
+ * @param  pulse
  * @retval speed
  */
 float CalActualSpeed(int pulse)
@@ -104,3 +108,7 @@ float CalActualSpeed(int pulse)
   return (float)(0.01349 * pulse); // unit: m/s
 }
 
+float CalNumberOfTurns(int totalPulse) // 总圈数计算
+{
+  return (float)(totalPulse / 1560.0);
+}
