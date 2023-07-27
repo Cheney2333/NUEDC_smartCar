@@ -43,13 +43,28 @@ extern "C"
     int PWM;           // 输出PWM值
 
   } PID;
+  typedef struct
+  {
+    // 相关速度PID参数
+    float Kp;
+    float Ki;
+    float Kd;
+    float Ur; // 限幅值
+
+    int PID_is_Enable; // PID使能
+    float Un;          // 期望输出值
+    float En_1;        // 上一次的误差值
+    float Integ;       // 累计误差，只在位置环用到
+    float targetSpeed; // 输出目标速度
+
+  } PID_POSITION;
   /* USER CODE END Private defines */
 
   /* USER CODE BEGIN Prototypes */
   void Speed_PID_Init(PID *p);                                   // PID值初始化
   void Speed_PID(float targetSpeed, float currentSpeed, PID *p); // 计算PID速度
-  void Position_PID_Init(PID *p);
-  void Position_PID(float targetPosition, float currentPosition, PID *p); // 计算PID速度
+  void Position_PID_Init(PID_POSITION *p);
+  float Position_PID(float targetPosition, float currentPosition, PID_POSITION *p); // 速度环：计算目标速度
   void Trail_PID_Init(PID *p);
   void Trail_PID(int currentX, PID *p); // 计算PID循迹速度变化量
   /* USER CODE END Prototypes */

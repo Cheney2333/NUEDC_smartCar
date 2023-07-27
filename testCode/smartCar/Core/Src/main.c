@@ -42,6 +42,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 PID Motor_PID[2];
+PID_POSITION Motor_Position_PID[2];
 PID trailMotor_PID;
 /* USER CODE END PTD */
 
@@ -72,8 +73,10 @@ float temperature = 0.0;                                            // 内部温
 short encoderPulse[2] = {0};    // 编码器脉冲数
 int totalEncoderPulse[2] = {0}; // 编码器总脉冲数
 float wheelTurns[2] = {0};      // 行驶的总圈数
-float totalDistance = 0.0;      // 行驶的路程
-float wheelSpeed[2] = {0};      // 0为左轮，1为右轮，本工程中均如此
+float targetTurn[2] = {10, 10};
+float totalDistance = 0.0; // 行驶的路程
+
+float wheelSpeed[2] = {0}; // 0为左轮，1为右轮，本工程中均如此
 float targetSpeed[2] = {0.0, 0.0};
 
 uint8_t Uart1RxBuff;         // 进入中断接收数据的数组
@@ -169,6 +172,8 @@ int main(void)
 
   Speed_PID_Init(&Motor_PID[0]);
   Speed_PID_Init(&Motor_PID[1]);
+  Position_PID_Init(&Motor_Position_PID[0]);
+  Position_PID_Init(&Motor_Position_PID[1]);
   Trail_PID_Init(&trailMotor_PID);
 
   /* USER CODE END 2 */
@@ -237,8 +242,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim1) // htim1 100Hz 10ms
   {
     GetEncoderPulse();
-    wheelTurns[0] = CalNumberOfTurns(totalEncoderPulse[0]);
+    wheelTurns[0] = CalNumberOfTurns(totalEncoderPulse[0]); // 获得当前行驶圈数
     wheelTurns[1] = CalNumberOfTurns(totalEncoderPulse[1]);
+
+    targetSpeed[0] = Position_PID(targetTurn[0], wheelTurns[0], &Motor_Position_PID[0]); // 根据目标圈数计算目标速度
+    targetSpeed[1] = Position_PID(targetTurn[1], wheelTurns[1], &Motor_Position_PID[1]);
+
     wheelSpeed[0] = CalActualSpeed(encoderPulse[0]); // 获得当前的速度值
     wheelSpeed[1] = CalActualSpeed(encoderPulse[1]);
 
@@ -246,6 +255,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Speed_PID(targetSpeed[1], wheelSpeed[1], &Motor_PID[1]);
 
     MotorControl(Motor_PID[0].PWM, Motor_PID[1].PWM);
+
+    printf("data:%.2f,%.2f,10\r\n", wheelTurns[0], wheelTurns[1]);
     //-----------------------获取电压值-------------------------------------------------
     if (tim1Count > 100)
     {
@@ -260,13 +271,13 @@ void OLEDShow()
   sprintf(oledString, "voltage:%.1fV", batteryVoltage);
   OLED_ShowString(0, 0, (char *)oledString, 12, 0);
 
-  sprintf(oledString, "A:%.2fm/s B:%.2fm/s", wheelSpeed[0], wheelSpeed[1]);
+  sprintf(oledString, "A:%.2fm/s B:%.2fm/s      ", wheelSpeed[0], wheelSpeed[1]);
   OLED_ShowString(0, 2, (char *)oledString, 12, 0);
 
-  sprintf(oledString, "distance: %d    ", distance);
+  sprintf(oledString, "distance: %d     ", distance);
   OLED_ShowString(0, 4, (char *)oledString, 12, 0);
 
-  sprintf(oledString, "At:%.2f Bt:%.2f  ", wheelTurns[0], wheelTurns[1]);
+  sprintf(oledString, "At:%.2f Bt:%.2f    ", wheelTurns[0], wheelTurns[1]);
   OLED_ShowString(0, 6, (char *)oledString, 12, 0);
 }
 

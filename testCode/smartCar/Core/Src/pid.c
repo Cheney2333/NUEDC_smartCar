@@ -16,18 +16,17 @@ void Speed_PID_Init(PID *p) // 速度环
 	p->En_2 = 0;
 	p->PWM = 0;
 }
-void Position_PID_Init(PID *p) // 位置环
+void Position_PID_Init(PID_POSITION *p) // 位置环
 {
-	p->Kp = 1.0;
+	p->Kp = 0.8;
 	p->Ki = 0.0;
-	p->Kd = 0.0;
-	p->Ur = 40;
+	p->Kd = 0.5;
+	p->Ur = 0.6; // 最大速度0.40m/s
 	p->PID_is_Enable = 1;
-	p->Un = 3;
+	p->Un = 0;
 	p->En_1 = 0;
-	p->En_2 = 0;
 	p->Integ = 0;
-	p->PWM = 0;
+	p->targetSpeed = 0;
 }
 void Trail_PID_Init(PID *p) // 循迹
 {
@@ -69,7 +68,7 @@ void Speed_PID(float targetSpeed, float currentSpeed, PID *p)
 		Speed_PID_Init(p);
 	}
 }
-void Position_PID(float targetPosition, float currentPosition, PID *p)
+float Position_PID(float targetPosition, float currentPosition, PID_POSITION *p) // 此处的位置即为轮子圈数
 {
 	if (p->PID_is_Enable == 1)
 	{
@@ -79,24 +78,26 @@ void Position_PID(float targetPosition, float currentPosition, PID *p)
 		p->Integ += error;
 
 		// 计算PID输出
-		p->PWM = p->Kp * error + p->Ki * p->Integ + p->Kd * (error - p->En_1);
+		p->targetSpeed = p->Kp * error + p->Ki * p->Integ + p->Kd * (error - p->En_1);
 
 		p->En_1 = error; // 保存当前位置误差，供下一次计算使用
 
 		// 输出限幅
-		if (p->PWM > p->Ur)
+		if (p->targetSpeed > p->Ur)
 		{
-			p->PWM = p->Ur;
+			p->targetSpeed = p->Ur;
 		}
-		if (p->PWM < -p->Ur)
+		if (p->targetSpeed < -p->Ur)
 		{
-			p->PWM = -p->Ur;
+			p->targetSpeed = -p->Ur;
 		}
 	}
 	else
 	{
 		Position_PID_Init(p);
 	}
+
+	return p->targetSpeed;
 }
 void Trail_PID(int currentX, PID *p)
 {
