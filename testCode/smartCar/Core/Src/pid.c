@@ -18,10 +18,10 @@ void Speed_PID_Init(PID *p) // 速度环
 }
 void Position_PID_Init(PID *p) // 位置环
 {
-	p->Kp = 25.0;
-	p->Ki = 2.5;
-	p->Kd = 2.5;
-	p->Ur = 100;
+	p->Kp = 1.0;
+	p->Ki = 0.0;
+	p->Kd = 0.0;
+	p->Ur = 40;
 	p->PID_is_Enable = 1;
 	p->Un = 3;
 	p->En_1 = 0;

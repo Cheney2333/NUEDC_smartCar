@@ -1,0 +1,26 @@
+{
+    "files.associations": {
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "tim.h": "c",
+        "oled.h": "c",
+        "mpu6050.h": "c",
+        "iic.h": "c",
+        "inv_mpu_dmp_motion_driver.h": "c",
+        "oled_ssd1306.h": "c",
+        "ccd_tsl1401.h": "c",
+        "ccd.h": "c",
+        "i2c.h": "c",
+        "inttypes.h": "c",
+        "inv_mpu.h": "c",
+        "mpu_6050.h": "c",
+        "i2c_simulate.h": "c",
+        "stdio.h": "c",
+        "pid.h": "c",
+        "motor.h": "c",
+        "main.h": "c",
+        "stm32f1xx_it.h": "c",
+        "vl53l0x.h": "c"
+    }
+}

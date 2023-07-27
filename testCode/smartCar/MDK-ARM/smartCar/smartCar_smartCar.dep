@@ -2,7 +2,7 @@ Dependencies for Project 'smartCar', Target 'smartCar': (DO NOT MODIFY !)
 CompilerVersion: 6190000::V6.19::ARMCLANG
 F (startup_stm32f103xe.s)(0x64BC9EB4)(--target=arm-arm-none-eabi -mcpu=cortex-m3 -masm=auto  -Wa,armasm,--diag_suppress=A1950W -c-gdwarf-4 -Wa,armasm,--pd,"__MICROLIB SETA 1"-I./RTE/_smartCar-ID:/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include-ID:/Arm/Packs/Keil/STM32F1xx_DFP/2.4.1/Device/Include-Wa,armasm,--pd,"__UVISION_VERSION SETA 538" -Wa,armasm,--pd,"_RTE_ SETA 1" -Wa,armasm,--pd,"STM32F10X_HD SETA 1" -Wa,armasm,--pd,"_RTE_ SETA 1"-o smartcar/startup_stm32f103xe.o)
 F (..\Core\Src\motor.c)(0x64BC99CD)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../HARDWARE/OLED -I ../HARDWARE/BLUETOOTH -I ../HARDWARE/MPU6050 -I ../HARDWARE/TSL1401 -I ../HARDWARE/VL53L0x-I./RTE/_smartCar-ID:/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include-ID:/Arm/Packs/Keil/STM32F1xx_DFP/2.4.1/Device/Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F10X_HD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xE-o smartcar/motor.o -MD)
-I (..\Core\Inc\motor.h)(0x64BC99E6)
+I (..\Core\Inc\motor.h)(0x64C0E66F)
 I (..\Core\Inc\main.h)(0x64BC9F61)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h)(0x64761414)
 I (..\Core\Inc\stm32f1xx_hal_conf.h)(0x64BC9EB1)
@@ -37,9 +37,9 @@ I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h)(0x64761414)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h)(0x64761414)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h)(0x64761414)
 I (..\Core\Inc\tim.h)(0x64A41F97)
-I (..\Core\Inc\pid.h)(0x64A9235F)
-F (..\Core\Src\pid.c)(0x64BC9871)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../HARDWARE/OLED -I ../HARDWARE/BLUETOOTH -I ../HARDWARE/MPU6050 -I ../HARDWARE/TSL1401 -I ../HARDWARE/VL53L0x-I./RTE/_smartCar-ID:/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include-ID:/Arm/Packs/Keil/STM32F1xx_DFP/2.4.1/Device/Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F10X_HD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xE-o smartcar/pid.o -MD)
-I (..\Core\Inc\pid.h)(0x64A9235F)
+I (..\Core\Inc\pid.h)(0x64C0F38B)
+F (..\Core\Src\pid.c)(0x64C0F43F)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-4 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../HARDWARE/OLED -I ../HARDWARE/BLUETOOTH -I ../HARDWARE/MPU6050 -I ../HARDWARE/TSL1401 -I ../HARDWARE/VL53L0x-I./RTE/_smartCar-ID:/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include-ID:/Arm/Packs/Keil/STM32F1xx_DFP/2.4.1/Device/Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F10X_HD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xE-o smartcar/pid.o -MD)
+I (..\Core\Inc\pid.h)(0x64C0F38B)
 I (..\Core\Inc\main.h)(0x64BC9F61)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h)(0x64761414)
 I (..\Core\Inc\stm32f1xx_hal_conf.h)(0x64BC9EB1)
@@ -113,8 +113,8 @@ I (..\Core\Inc\i2c.h)(0x64AA1580)
 I (..\Core\Inc\tim.h)(0x64A41F97)
 I (..\Core\Inc\usart.h)(0x64A922F7)
 I (..\Core\Inc\gpio.h)(0x64648472)
-I (..\Core\Inc\motor.h)(0x64BC99E6)
-I (..\Core\Inc\pid.h)(0x64A9235F)
+I (..\Core\Inc\motor.h)(0x64C0E66F)
+I (..\Core\Inc\pid.h)(0x64C0F38B)
 I (..\HARDWARE\OLED\oled.h)(0x64994B5F)
 I (..\HARDWARE\OLED\oledfont.h)(0x64994BE4)
 I (D:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x63884908)
@@ -371,7 +371,7 @@ I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h)(0x64761414)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h)(0x64761414)
 I (..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h)(0x64761414)
 I (..\Core\Inc\stm32f1xx_it.h)(0x64BC9EB1)
-I (..\Core\Inc\motor.h)(0x64BC99E6)
+I (..\Core\Inc\motor.h)(0x64C0E66F)
 I (D:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x63884908)
 I (..\Core\Inc\usart.h)(0x64A922F7)
 I (D:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x63884908)
