@@ -241,6 +241,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim1Count++;
   if (htim == &htim1) // htim1 100Hz 10ms
   {
+    //--------------------------PID计算------------------------------------------------
     GetEncoderPulse();
     wheelTurns[0] = CalNumberOfTurns(totalEncoderPulse[0]); // 获得当前行驶圈数
     wheelTurns[1] = CalNumberOfTurns(totalEncoderPulse[1]);
