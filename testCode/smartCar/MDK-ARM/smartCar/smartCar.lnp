@@ -7,6 +7,7 @@
 "smartcar\adc.o"
 "smartcar\dma.o"
 "smartcar\i2c.o"
+"smartcar\spi.o"
 "smartcar\tim.o"
 "smartcar\usart.o"
 "smartcar\stm32f1xx_it.o"
@@ -25,6 +26,7 @@
 "smartcar\stm32f1xx_hal_flash_ex.o"
 "smartcar\stm32f1xx_hal_exti.o"
 "smartcar\stm32f1xx_hal_i2c.o"
+"smartcar\stm32f1xx_hal_spi.o"
 "smartcar\stm32f1xx_hal_tim.o"
 "smartcar\stm32f1xx_hal_tim_ex.o"
 "smartcar\stm32f1xx_hal_uart.o"
@@ -37,6 +39,9 @@
 "smartcar\mpu6050.o"
 "smartcar\ccd_tsl1401.o"
 "smartcar\vl53l0x.o"
+"smartcar\lcd_fonts.o"
+"smartcar\lcd_image.o"
+"smartcar\lcd_spi_169.o"
 --library_type=microlib --strict --scatter "smartCar\smartCar.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

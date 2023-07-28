@@ -5,6 +5,11 @@
         "*.wxss": "css",
         "*.wxs": "javascript",
         "motor.h": "c",
-        "pid.h": "c"
+        "pid.h": "c",
+        "main.h": "c",
+        "lcd_fonts.h": "c",
+        "stdio.h": "c",
+        "lcd_spi_169.h": "c",
+        "lcd_image.h": "c"
     }
 }

@@ -36,12 +36,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-  typedef struct
-  {
-    int a; // 三角形
-    int b; // 正方形
-    int c; // 圆形
-  } GIRD;
 
 /* USER CODE END ET */
 
@@ -62,15 +56,7 @@ void Error_Handler(void);
   void MPU6050_GetData(void);
   void Main_Loop(void);
   void OLEDShow(void);
-  void Basic_1(void);
-  void Basic_2(void);
-  void Buzzer(void);
-  void LED_GREEN_2S(void);
-  void LED_RED_1S(void);
-  void GirdsNumber(void);
-  void GetKeyStatus(void);
-  void Expand_1(void);
-  void Expand_2(void);
+  void LCD_Show(void);
   void PID_Calculate(void);
 /* USER CODE END EFP */
 
@@ -85,8 +71,6 @@ void Error_Handler(void);
 #define BMotorEncoderA_GPIO_Port GPIOA
 #define BMotorEncoderB_Pin GPIO_PIN_7
 #define BMotorEncoderB_GPIO_Port GPIOA
-#define KEY1_Pin GPIO_PIN_8
-#define KEY1_GPIO_Port GPIOE
 #define KEY2_Pin GPIO_PIN_9
 #define KEY2_GPIO_Port GPIOE
 #define KEY3_Pin GPIO_PIN_10
@@ -103,6 +87,8 @@ void Error_Handler(void);
 #define VL53L0X_SCL_GPIO_Port GPIOB
 #define VL53L0X_SDA_Pin GPIO_PIN_11
 #define VL53L0X_SDA_GPIO_Port GPIOB
+#define LCD_Backlight_Pin GPIO_PIN_13
+#define LCD_Backlight_GPIO_Port GPIOD
 #define PWMA_Pin GPIO_PIN_14
 #define PWMA_GPIO_Port GPIOD
 #define PWMB_Pin GPIO_PIN_15
@@ -138,10 +124,12 @@ void Error_Handler(void);
 #define KEY3 HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin)
 #define KEY4 HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin)
 
-#define ADC_CHANNEL_COUNT 2  // ADC通道数量
-#define ADC_AVERAGE_COUNT 10 // 单个通道采样值，用来取平均值
-#define V25 0.76             // unit: V
-#define AVG_SLOPE 2.5        // unit: mV/摄氏度
+#define ADC_CHANNEL_COUNT 2       // ADC通道数量
+#define ADC_AVERAGE_COUNT 10      // 单个通道采样值，用来取平均值
+#define V25 0.76                  // unit: V
+#define AVG_SLOPE 2.5             // unit: mV/摄氏度
+#define DIAMETER 6.7              // 小车轮子直径，单位:cm
+#define PERIMETER 3.14 * DIAMETER // 小车轮子周长
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

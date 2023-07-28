@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "dma.h"
 #include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -37,6 +38,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "VL53L0X.h"
+#include "lcd_spi_169.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +63,7 @@ PID trailMotor_PID;
 /* USER CODE BEGIN PV */
 int testPWM = 20;
 char oledString[30];
+char LCD_String[50];
 int tim1Count = 0; // 中断计时
 float batteryVoltage = 0.0;
 float pitch, roll, yaw;    // 欧拉角
@@ -73,7 +76,7 @@ float temperature = 0.0;                                            // 内部温
 short encoderPulse[2] = {0};    // 编码器脉冲数
 int totalEncoderPulse[2] = {0}; // 编码器总脉冲数
 float wheelTurns[2] = {0};      // 行驶的总圈数
-float targetTurn[2] = {10, 10};
+float targetTurn[2] = {10, -10};
 float totalDistance = 0.0; // 行驶的路程
 
 float wheelSpeed[2] = {0}; // 0为左轮，1为右轮，本工程中均如此
@@ -85,7 +88,7 @@ int Rx1Line = 0;             // 接收到的数据长度
 
 int mode[5] = {0};
 
-uint16_t distance = 0; // unit: mm
+float distance[2] = {0.0}; // unit: m
 statInfo_t_VL53L0X distanceStr;
 /* USER CODE END PV */
 
@@ -138,9 +141,12 @@ int main(void)
   MX_TIM2_Init();
   MX_USART3_UART_Init();
   MX_I2C2_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-  OLED_Init(); // 初始化OLED
-  OLED_Clear();
+  // OLED_Init(); // 初始化OLED
+  // OLED_Clear();
+
+  SPI_LCD_Init(); // SPI LCD初始化
 
   // Initialise the VL53L0X
   initVL53L0X(1, &hi2c2);
@@ -170,6 +176,8 @@ int main(void)
   __HAL_TIM_SET_COUNTER(&htim2, 0);
   __HAL_TIM_SET_COUNTER(&htim3, 0); // initialize encoder timing and set it to 3000
 
+  // __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0);
+
   Speed_PID_Init(&Motor_PID[0]);
   Speed_PID_Init(&Motor_PID[1]);
   Position_PID_Init(&Motor_Position_PID[0]);
@@ -182,7 +190,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    OLEDShow();
+    // OLEDShow();
+    LCD_Show();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -240,15 +249,16 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   tim1Count++;
-  if (htim == &htim1) // htim1 100Hz 10ms
+  if (htim == &htim1) // htim1 | 100Hz | 10ms
   {
     //--------------------------PID计算------------------------------------------------
     PID_Calculate();
     MotorControl(Motor_PID[0].PWM, Motor_PID[1].PWM);
 
-    printf("data:%.2f,%.2f,10\r\n", wheelTurns[0], wheelTurns[1]);
+    printf("test\r\n");
+    // printf("data:%.2f,%.2f,10\r\n", wheelTurns[0], wheelTurns[1]);
     //-----------------------获取电压值-------------------------------------------------
-    if (tim1Count > 100)  // 100 * 10 ms = 1s
+    if (tim1Count > 100) // 100 * 10 ms = 1s
     {
       HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
       batteryVoltage = ADC_Value[0] * 5.0;
@@ -265,11 +275,8 @@ void OLEDShow()
   sprintf(oledString, "A:%.2fm/s B:%.2fm/s      ", wheelSpeed[0], wheelSpeed[1]);
   OLED_ShowString(0, 2, (char *)oledString, 12, 0);
 
-  sprintf(oledString, "distance: %d     ", distance);
-  OLED_ShowString(0, 4, (char *)oledString, 12, 0);
-
   sprintf(oledString, "At:%.2f Bt:%.2f    ", wheelTurns[0], wheelTurns[1]);
-  OLED_ShowString(0, 6, (char *)oledString, 12, 0);
+  OLED_ShowString(0, 4, (char *)oledString, 12, 0);
 }
 
 void MPU6050_GetData() // 获取MPU6050的数值
@@ -294,6 +301,32 @@ void PID_Calculate()
 
   Speed_PID(targetSpeed[0], wheelSpeed[0], &Motor_PID[0]); // 根据目标速度和实际速度计算PID参数
   Speed_PID(targetSpeed[1], wheelSpeed[1], &Motor_PID[1]);
+
+  distance[0] = wheelTurns[0] * PERIMETER; // 左轮路程
+  distance[1] = wheelTurns[1] * PERIMETER; // 左轮路程
+}
+
+void LCD_Show()
+{
+  LCD_SetDirection(Direction_V);
+  LCD_SetTextFont(&CH_Font20);
+  LCD_SetColor(LIGHT_YELLOW);
+  LCD_SetBackColor(LCD_BLACK);
+
+  sprintf(LCD_String, "voltage:%.1fV          ", batteryVoltage);
+  LCD_DisplayText(13, 10, LCD_String);
+  sprintf(LCD_String, "Speed_A:%.2fm/s    ", wheelSpeed[0]);
+  LCD_DisplayText(13, 40, LCD_String);
+  sprintf(LCD_String, "Speed_B:%.2fm/s    ", wheelSpeed[1]);
+  LCD_DisplayText(13, 70, LCD_String);
+  sprintf(LCD_String, "distance_A: %.2f       ", distance[0]);
+  LCD_DisplayText(13, 100, LCD_String);
+  sprintf(LCD_String, "distance_B: %.2f       ", distance[1]);
+  LCD_DisplayText(13, 130, LCD_String);
+  sprintf(LCD_String, "Wheel_A_turns:%.2f    ", wheelTurns[0]);
+  LCD_DisplayText(13, 160, LCD_String);
+  sprintf(LCD_String, "Wheel_B_turns:%.2f    ", wheelTurns[1]);
+  LCD_DisplayText(13, 190, LCD_String);
 }
 
 /* USER CODE END 4 */

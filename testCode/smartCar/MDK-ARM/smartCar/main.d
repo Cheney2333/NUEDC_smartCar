@@ -28,17 +28,20 @@ smartcar/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_flash_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_i2c.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_pwr.h \
+  ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_spi.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   ..\Core\Inc\adc.h ..\Core\Inc\dma.h ..\Core\Inc\i2c.h \
-  ..\Core\Inc\tim.h ..\Core\Inc\usart.h ..\Core\Inc\gpio.h \
-  ..\Core\Inc\motor.h ..\Core\Inc\pid.h ..\HARDWARE\OLED\oled.h \
-  ..\HARDWARE\OLED\oledfont.h \
+  ..\Core\Inc\spi.h ..\Core\Inc\tim.h ..\Core\Inc\usart.h \
+  ..\Core\Inc\gpio.h ..\Core\Inc\motor.h ..\Core\Inc\pid.h \
+  ..\HARDWARE\OLED\oled.h ..\HARDWARE\OLED\oledfont.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h \
   ..\HARDWARE\MPU6050\IIC.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\inttypes.h \
   ..\HARDWARE\MPU6050\mpu6050.h ..\HARDWARE\MPU6050\inv_mpu.h \
   ..\HARDWARE\MPU6050\inv_mpu_dmp_motion_driver.h \
-  ..\HARDWARE\VL53L0x\VL53L0X.h
+  ..\HARDWARE\VL53L0x\VL53L0X.h ..\HARDWARE\LCD_SPI_169\lcd_spi_169.h \
+  ..\HARDWARE\LCD_SPI_169\lcd_fonts.h \
+  ..\HARDWARE\LCD_SPI_169\lcd_image.h
