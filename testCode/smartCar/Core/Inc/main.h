@@ -71,16 +71,12 @@ void Error_Handler(void);
   void GetKeyStatus(void);
   void Expand_1(void);
   void Expand_2(void);
-  void findTwoLargestIndex(int a[], int *firstIndex, int *secondIndex);
+  void PID_Calculate(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define CCD_AO_Pin GPIO_PIN_0
-#define CCD_AO_GPIO_Port GPIOC
-#define CCD_SI_Pin GPIO_PIN_1
-#define CCD_SI_GPIO_Port GPIOC
-#define CCD_CLK_Pin GPIO_PIN_2
-#define CCD_CLK_GPIO_Port GPIOC
+#define LED1_Pin GPIO_PIN_5
+#define LED1_GPIO_Port GPIOE
 #define AMotorEncoderA_Pin GPIO_PIN_0
 #define AMotorEncoderA_GPIO_Port GPIOA
 #define AMotorEncoderB_Pin GPIO_PIN_1
@@ -97,8 +93,6 @@ void Error_Handler(void);
 #define KEY3_GPIO_Port GPIOE
 #define KEY4_Pin GPIO_PIN_11
 #define KEY4_GPIO_Port GPIOE
-#define TCRT_D0_Pin GPIO_PIN_12
-#define TCRT_D0_GPIO_Port GPIOE
 #define Buzzer_IO_Pin GPIO_PIN_13
 #define Buzzer_IO_GPIO_Port GPIOE
 #define LED_RED_Pin GPIO_PIN_14
@@ -109,8 +103,6 @@ void Error_Handler(void);
 #define VL53L0X_SCL_GPIO_Port GPIOB
 #define VL53L0X_SDA_Pin GPIO_PIN_11
 #define VL53L0X_SDA_GPIO_Port GPIOB
-#define TCRT_2_D0_Pin GPIO_PIN_12
-#define TCRT_2_D0_GPIO_Port GPIOD
 #define PWMA_Pin GPIO_PIN_14
 #define PWMA_GPIO_Port GPIOD
 #define PWMB_Pin GPIO_PIN_15
@@ -146,10 +138,10 @@ void Error_Handler(void);
 #define KEY3 HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin)
 #define KEY4 HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin)
 
-#define ADC_CHANNEL_COUNT 2   // ADC通道数量
+#define ADC_CHANNEL_COUNT 2  // ADC通道数量
 #define ADC_AVERAGE_COUNT 10 // 单个通道采样值，用来取平均值
-#define V25 0.76              // unit: V
-#define AVG_SLOPE 2.5         // unit: mV/摄氏度
+#define V25 0.76             // unit: V
+#define AVG_SLOPE 2.5        // unit: mV/摄氏度
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
