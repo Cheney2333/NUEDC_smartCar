@@ -10,6 +10,7 @@
         "lcd_fonts.h": "c",
         "stdio.h": "c",
         "lcd_spi_169.h": "c",
-        "lcd_image.h": "c"
+        "lcd_image.h": "c",
+        "mpu6050.h": "c"
     }
 }

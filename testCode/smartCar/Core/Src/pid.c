@@ -21,7 +21,7 @@ void Position_PID_Init(PID_POSITION *p) // 位置环
 	p->Kp = 0.8;
 	p->Ki = 0.0;
 	p->Kd = 0.5;
-	p->Ur = 0.6; // 最大速度0.40m/s
+	p->Ur = 0.6; // 最大速度0.60m/s
 	p->PID_is_Enable = 1;
 	p->Un = 0;
 	p->En_1 = 0;
