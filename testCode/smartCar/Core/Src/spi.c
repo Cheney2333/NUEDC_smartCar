@@ -27,8 +27,6 @@
 SPI_HandleTypeDef hspi3;
 
 /* SPI3 init function */
-
-
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 {
 

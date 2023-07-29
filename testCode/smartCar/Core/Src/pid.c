@@ -63,10 +63,6 @@ void Speed_PID(float targetSpeed, float currentSpeed, PID *p)
 		if (p->PWM < -p->Ur)
 			p->PWM = -p->Ur;
 	}
-	else
-	{
-		Speed_PID_Init(p);
-	}
 }
 float Position_PID(float targetPosition, float currentPosition, PID_POSITION *p) // 此处的位置即为轮子圈数
 {
@@ -92,10 +88,6 @@ float Position_PID(float targetPosition, float currentPosition, PID_POSITION *p)
 			p->targetSpeed = -p->Ur;
 		}
 	}
-	else
-	{
-		Position_PID_Init(p);
-	}
 
 	return p->targetSpeed;
 }
@@ -118,9 +110,5 @@ void Trail_PID(int currentX, PID *p)
 			p->Un = p->Ur;
 		if (p->Un < -p->Ur)
 			p->Un = -p->Ur;
-	}
-	else
-	{
-		Trail_PID_Init(p);
 	}
 }
