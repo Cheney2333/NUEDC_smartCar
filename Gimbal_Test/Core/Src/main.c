@@ -33,21 +33,23 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+Laser_PID Servo_A;
+Laser_PID Servo_B;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 int tim1Count = 0; // 定时器1中断计数
 extern int angle[2];
+extern int deltaAngle[2];
 char LCD_String[50] = {0};
 
-uint8_t Uart2RxBuff;         // 进入中断接收数据的数组
-uint8_t Uart2DataBuff[5000]; // 保存接收到的数据的数组
-int Rx2Line = 0;             // 接收到的数据长度
+uint8_t Uart3RxBuff;         // 进入中断接收数据的数组
+uint8_t Uart3DataBuff[5000]; // 保存接收到的数据的数组
+int Rx3Line = 0;             // 接收到的数据长度
 
-extern int redLaserPosition[2];
-extern int greenLaserPosition[2];
+extern Laser RedLaser;
+extern Laser GreenLaser;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -104,21 +106,26 @@ int main(void)
   MX_SPI3_Init();
   MX_USART1_UART_Init();
   MX_TIM2_Init();
-  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  SPI_LCD_Init(); // SPI LCD初始化
+  // SPI_LCD_Init(); // SPI LCD初始化
+  Laser_Init();               // 初始化红绿激光的坐标参数等
+  Servo_A_PID_Init(&Servo_A); // 初始化舵机A的PID参数
+  Servo_B_PID_Init(&Servo_B); // 初始化舵机B的PID参数
 
   HAL_TIM_Base_Start_IT(&htim1); // 启动定时器1中断
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  HAL_UART_Receive_IT(&huart2, &Uart2RxBuff, 1); // 串口2接收中断
+  HAL_UART_Receive_IT(&huart3, &Uart3RxBuff, 1); // 串口2接收中断
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    LCD_Show();
+    // setServoAngle(angle[0], angle[1]);
+    // LCD_Show();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -176,7 +183,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   tim1Count++;
   if (htim == &htim1) // htim1 | 100Hz | 10ms
   {
-    setServoAngle(angle[0], angle[1]);
+    if (RedLaser.IS_DETECTED == 1)
+    {
+      Trace_PID_Servo_A(RedLaser.y, K210_SCREEN_CENTER_Y, &Servo_A);
+      Trace_PID_Servo_B(RedLaser.x, K210_SCREEN_CENTER_X, &Servo_B);
+      setServoAngle(angle[0] + deltaAngle[0], angle[1] - deltaAngle[1]);
+    }
+    else
+    {
+      setServoAngle(angle[0], angle[1]);
+    }
+    // printf("red:%d,%d;green:%d,%d\r\n", RedLaser.x, RedLaser.y, GreenLaser.x, GreenLaser.y);
+
     if (tim1Count > 40) // 400ms
     {
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -192,10 +210,10 @@ void LCD_Show()
   LCD_SetColor(LIGHT_YELLOW);
   LCD_SetBackColor(LCD_BLACK);
 
-  sprintf(LCD_String, "Rx:%d  Ry:%d        ", redLaserPosition[0], redLaserPosition[1]);
-  LCD_DisplayText(13, 10, LCD_String);
-  sprintf(LCD_String, "Gx:%d  Gy:%d        ", greenLaserPosition[0], greenLaserPosition[1]);
-  LCD_DisplayText(13, 40, LCD_String);
+  LCD_DisplayText(13, 40, "test");
+
+  // sprintf(LCD_String, "Gx:%d  Gy:%d        ", greenLaserPosition[0], greenLaserPosition[1]);
+  // LCD_DisplayText(13, 40, LCD_String);
 }
 /* USER CODE END 4 */
 

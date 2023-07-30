@@ -168,22 +168,22 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>redLaserPosition[0],0x0A</ItemText>
+          <ItemText>RedLaser,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>redLaserPosition[1],0x0A</ItemText>
+          <ItemText>GreenLaser,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>greenLaserPosition[0],0x0A</ItemText>
+          <ItemText>deltaAngle[0],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>greenLaserPosition[1],0x0A</ItemText>
+          <ItemText>deltaAngle[1],0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
