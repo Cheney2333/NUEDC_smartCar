@@ -3,6 +3,10 @@
 #include "gpio.h"
 #include "Servo.h"
 
+int angle[2] = {90, 135};
+int redLaserPosition[2] = {0, 0};
+int greenLaserPosition[2] = {0, 0};
+
 void setServoAngle(int angle_A, int angle_B)
 {
     float pulse_width_A = 50.0 + angle_A * 200.0 / 180.0; // 舵机A：上层舵机

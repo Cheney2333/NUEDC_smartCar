@@ -8,6 +8,7 @@
         "servo.h": "c",
         "tim.h": "c",
         "gpio.h": "c",
-        "spi.h": "c"
+        "spi.h": "c",
+        "string.h": "c"
     }
 }

@@ -35,4 +35,5 @@ gimbal_test/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Core\Inc\spi.h ..\Core\Inc\tim.h ..\Core\Inc\usart.h \
   ..\Core\Inc\gpio.h ..\HARDWARE\LCD_SPI_169\lcd_spi_169.h \
   ..\HARDWARE\LCD_SPI_169\lcd_fonts.h \
-  ..\HARDWARE\LCD_SPI_169\lcd_image.h ..\HARDWARE\Servo\Servo.h
+  ..\HARDWARE\LCD_SPI_169\lcd_image.h ..\HARDWARE\Servo\Servo.h \
+  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h
